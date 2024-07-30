@@ -6,7 +6,7 @@ static double s_render_fps;
 
 static bool s_hud;
 
-int main()
+int WinMain()
 {
 	window_create(1280, 720, "Rivet Rival");
 	
