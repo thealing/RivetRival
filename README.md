@@ -1,6 +1,14 @@
 # Rivet Rival
 This is a [Drive Ahead](https://play.google.com/store/apps/details?id=com.dodreams.driveahead&hl=en) clone game written using [my game engine](https://github.com/thealing/GameFramework).
 The project has been made using Visual Studio 2019 on Windows.
+# Button Keybindings
+- Enter - start, restart
+- Space - pause, resume
+- Backspace - leave
+- A - blue backward
+- D - blue forward
+- Left Arrow - red forward
+- Right Arrow - red backward
 # Screenshots
 ![Battle1](https://github.com/user-attachments/assets/c25944e5-4be0-4930-bcb6-0eb40cb6034b)
 ![Battle3](https://github.com/user-attachments/assets/0f7f450e-00ba-46a0-8cd4-f5fd4c350ba8)
