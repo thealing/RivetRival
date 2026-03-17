@@ -71,6 +71,13 @@ void scene_update(double delta_time)
 		{
 			counter_update(s_counters[i]);
 		}
+
+		if (input_is_key_pressed('B'))
+		{
+			g_debug_hud = !g_debug_hud;
+
+			sound_play(g_sounds.blip);
+		}
 	}
 }
 

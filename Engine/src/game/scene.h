@@ -6,6 +6,8 @@
 
 #include "counter.h"
 
+#include "global.h"
+
 #include <stddef.h>
 
 #define BUTTON_COUNT_MAX 20

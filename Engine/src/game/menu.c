@@ -232,11 +232,6 @@ void menu_enter()
 	scene_add_button(s_play);
 
 	scene_add_button(s_settings);
-
-	if (!sound_is_playing(g_sounds.intro))
-	{
-		sound_play(g_sounds.intro);
-	}
 }
 
 void menu_leave()
@@ -280,6 +275,11 @@ void menu_update(double delta_time)
 		scene_change(&g_settings);
 
 		return;
+	}
+
+	if (!sound_is_playing(g_sounds.intro))
+	{
+		sound_play(g_sounds.intro);
 	}
 }
 

@@ -14,7 +14,7 @@
 
 #include <shlobj.h>
 
-#include <vfw.h>
+#include <dshow.h>
 
 #include <GL/gl.h>
 
