@@ -173,6 +173,11 @@ void settings_update(double delta_time)
 
 		return;
 	}
+
+	if (!sound_is_playing(g_sounds.intro))
+	{
+		sound_play(g_sounds.intro);
+	}
 }
 
 void settings_render()
