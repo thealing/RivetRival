@@ -2,7 +2,7 @@
 
 Counter* counter_create(Vector position, Vector half_size, int min, int max, int* value)
 {
-	Counter* counter = malloc(sizeof(Counter));
+	Counter* counter = HEAPALLOC(sizeof(Counter));
 
 	Vector left_center = vector_subtract_xy(position, half_size.x + half_size.y, 0);
 

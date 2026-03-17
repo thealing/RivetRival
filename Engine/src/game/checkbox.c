@@ -2,7 +2,7 @@
 
 Checkbox* checkbox_create(Vector position, double half_size, bool* value)
 {
-	Checkbox* checkbox = malloc(sizeof(Checkbox));
+	Checkbox* checkbox = HEAPALLOC(sizeof(Checkbox));
 
 	checkbox->rect = (Rect){ vector_subtract_value(position, half_size), vector_add_value(position, half_size) };
 

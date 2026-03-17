@@ -108,7 +108,7 @@ void physics_world_step(Physics_World* world, double delta_time)
 
 	int collision_count_limit = imin(isquare(world->collider_list.size), PHYSICS_COLLISION_COUNT_MAX);
 
-	Physics_Collision* collisions = malloc(collision_count_limit * sizeof(Physics_Collision));
+	Physics_Collision* collisions = HEAPALLOC(collision_count_limit * sizeof(Physics_Collision));
 
 	int collision_count = 0;
 

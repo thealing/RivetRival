@@ -13,15 +13,13 @@ struct Sound
 	IMediaSeeking* seeking;
 
 	IBasicAudio* audio;
-
-	bool looping;
 };
 
 Sound* sound_load(const char* path)
 {
 	CoInitialize(NULL);
 
-	Sound* sound = (Sound*)malloc(sizeof(Sound));
+	Sound* sound = (Sound*)HEAPALLOC(sizeof(Sound));
 
 	CoCreateInstance(&CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER, &IID_IGraphBuilder, (void**)&sound->graph);
 
@@ -38,8 +36,6 @@ Sound* sound_load(const char* path)
 	MultiByteToWideChar(CP_ACP, 0, path, -1, wide_path, MAX_PATH);
 
 	sound->graph->lpVtbl->RenderFile(sound->graph, wide_path, NULL);
-
-	sound->looping = false;
 
 	return sound;
 }
@@ -65,18 +61,17 @@ void sound_destroy(Sound* sound)
 
 bool sound_is_playing(Sound* sound)
 {
-	long code;
+	LONGLONG duration = 0;
 
-	LONG_PTR p1, p2;
+	sound->seeking->lpVtbl->GetDuration(sound->seeking, &duration);
 
-	while (sound->event->lpVtbl->GetEvent(sound->event, &code, &p1, &p2, 0) == S_OK)
+	LONGLONG current = 0;
+
+	sound->seeking->lpVtbl->GetCurrentPosition(sound->seeking, &current);
+
+	if (current >= duration)
 	{
-		if (code == EC_COMPLETE)
-		{
-			sound->control->lpVtbl->Stop(sound->control);
-		}
-
-		sound->event->lpVtbl->FreeEventParams(sound->event, code, p1, p2);
+		return false;
 	}
 
 	OAFilterState state = 0;

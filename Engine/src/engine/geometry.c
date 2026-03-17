@@ -395,7 +395,7 @@ Vector polygon_project_point(const Polygon* polygon, Vector point)
 
 Shape* shape_create_segment(Vector a, Vector b)
 {
-	Shape* shape = malloc(sizeof(Shape));
+	Shape* shape = HEAPALLOC(sizeof(Shape));
 
 	shape->type = SHAPE_TYPE_SEGMENT;
 
@@ -408,7 +408,7 @@ Shape* shape_create_segment(Vector a, Vector b)
 
 Shape* shape_create_circle(Vector center, double radius)
 {
-	Shape* shape = malloc(sizeof(Shape));
+	Shape* shape = HEAPALLOC(sizeof(Shape));
 
 	shape->type = SHAPE_TYPE_CIRCLE;
 
@@ -421,7 +421,7 @@ Shape* shape_create_circle(Vector center, double radius)
 
 Shape* shape_create_polygon(int point_count, const Vector points[])
 {
-	Shape* shape = malloc(sizeof(Shape) + sizeof(Vector) * point_count);
+	Shape* shape = HEAPALLOC(sizeof(Shape) + sizeof(Vector) * point_count);
 
 	shape->type = SHAPE_TYPE_POLYGON;
 

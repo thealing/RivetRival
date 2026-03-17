@@ -2,6 +2,8 @@
 
 #define UNUSED(p) (void)p
 
+#define HEAPALLOC(s) calloc(1, s);
+
 #if defined(_MSC_VER)
 
 #define STACKALLOC(s) _alloca(s)

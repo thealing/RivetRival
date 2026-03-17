@@ -46,11 +46,11 @@ Image* image_load(const char* path)
 
 	int row_size = width * 4;
 
-	char* pixels = malloc(row_size * height);
+	char* pixels = HEAPALLOC(row_size * height);
 
 	bitmap->lpVtbl->CopyPixels(bitmap, NULL, row_size, row_size * height, pixels);
 
-	char* temp = malloc(row_size);
+	char* temp = HEAPALLOC(row_size);
 
 	for (int i = 0; i < height - 1 - i; i++)
 	{
@@ -67,7 +67,7 @@ Image* image_load(const char* path)
 
 	free(temp);
 
-	Image* image = malloc(sizeof(Image));
+	Image* image = HEAPALLOC(sizeof(Image));
 
 	image->width = width;
 
@@ -108,7 +108,7 @@ void texture_create_from_image(Texture** texture_pointer, const Image* image)
 {
 	if (*texture_pointer == NULL)
 	{
-		*texture_pointer = malloc(sizeof(Texture));
+		*texture_pointer = HEAPALLOC(sizeof(Texture));
 	}
 
 	Texture* texture = *texture_pointer;
