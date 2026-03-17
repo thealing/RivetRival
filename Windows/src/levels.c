@@ -22,7 +22,7 @@ Level* level_create(Level_Type type, Physics_World* world, int group)
 
 	if (type == LEVEL_TYPE_CAVE || type == LEVEL_TYPE_TUNNEL)
 	{
-		for (int i = 0; i + 1 < countof(s_cave_bottom); i++)
+		for (int i = 0; i + 1 < COUNTOF(s_cave_bottom); i++)
 		{
 			Vector a = s_cave_bottom[i];
 
@@ -48,7 +48,7 @@ Level* level_create(Level_Type type, Physics_World* world, int group)
 
 	if (type == LEVEL_TYPE_DESERT_CAVE || type == LEVEL_TYPE_DESERT_TUNNEL)
 	{
-		for (int i = 0; i + 1 < countof(s_desert_bottom); i++)
+		for (int i = 0; i + 1 < COUNTOF(s_desert_bottom); i++)
 		{
 			Vector a = s_desert_bottom[i];
 
@@ -74,7 +74,7 @@ Level* level_create(Level_Type type, Physics_World* world, int group)
 
 	if (type == LEVEL_TYPE_TUNNEL || type == LEVEL_TYPE_DESERT_TUNNEL)
 	{
-		Shape* shape = shape_create_polygon(countof(s_center), s_center);
+		Shape* shape = shape_create_polygon(COUNTOF(s_center), s_center);
 
 		Physics_Collider* collider = physics_collider_create(level->body, shape, 1);
 
@@ -89,7 +89,7 @@ Level* level_create(Level_Type type, Physics_World* world, int group)
 
 	if (type == LEVEL_TYPE_DESERT_TUNNEL)
 	{
-		for (int i = 0; i + 1 < countof(s_desert_on_center); i++)
+		for (int i = 0; i + 1 < COUNTOF(s_desert_on_center); i++)
 		{
 			Vector a = s_desert_on_center[i];
 
@@ -115,7 +115,7 @@ Level* level_create(Level_Type type, Physics_World* world, int group)
 
 	if (type == LEVEL_TYPE_RAMP)
 	{
-		for (int i = 0; i + 1 < countof(s_ramp_bottom); i++)
+		for (int i = 0; i + 1 < COUNTOF(s_ramp_bottom); i++)
 		{
 			Vector a = s_ramp_bottom[i];
 
@@ -141,7 +141,7 @@ Level* level_create(Level_Type type, Physics_World* world, int group)
 
 	if (type == LEVEL_TYPE_GAP)
 	{
-		for (int i = 0; i + 1 < countof(s_gap_bottom); i++)
+		for (int i = 0; i + 1 < COUNTOF(s_gap_bottom); i++)
 		{
 			Vector a = s_gap_bottom[i];
 
@@ -167,7 +167,7 @@ Level* level_create(Level_Type type, Physics_World* world, int group)
 
 	if (true)
 	{
-		for (int i = 0; i + 1 < countof(s_cave_top); i++)
+		for (int i = 0; i + 1 < COUNTOF(s_cave_top); i++)
 		{
 			Vector a = s_cave_top[i];
 

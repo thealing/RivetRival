@@ -99,7 +99,7 @@
       <CallingConvention>Cdecl</CallingConvention>
       <FloatingPointModel>Fast</FloatingPointModel>
       <DisableSpecificWarnings>4090;4200;4201;6011;6031;26451</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>src;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;$(SolutionDir)\Engine\src</AdditionalIncludeDirectories>
       <UseFullPaths>true</UseFullPaths>
       <AdditionalOptions>/d1trimfile:"$(SolutionDir)\" %(AdditionalOptions)</AdditionalOptions>
       <BasicRuntimeChecks>StackFrameRuntimeCheck</BasicRuntimeChecks>
@@ -137,7 +137,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointExceptions>false</FloatingPointExceptions>
       <DisableSpecificWarnings>4090;4200;4201;6011;6031;26451</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>src;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;$(SolutionDir)\Engine\src</AdditionalIncludeDirectories>
       <UseFullPaths>true</UseFullPaths>
       <AdditionalOptions>/d1trimfile:"$(SolutionDir)\" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -163,7 +163,7 @@
       <CallingConvention>Cdecl</CallingConvention>
       <FloatingPointModel>Fast</FloatingPointModel>
       <DisableSpecificWarnings>4090;4200;4201;6011;6031;26451</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>src;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;$(SolutionDir)\Engine\src</AdditionalIncludeDirectories>
       <UseFullPaths>true</UseFullPaths>
       <AdditionalOptions>/d1trimfile:"$(SolutionDir)\" %(AdditionalOptions)</AdditionalOptions>
       <BasicRuntimeChecks>StackFrameRuntimeCheck</BasicRuntimeChecks>
@@ -201,7 +201,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointExceptions>false</FloatingPointExceptions>
       <DisableSpecificWarnings>4090;4200;4201;6011;6031;26451</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>src;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;$(SolutionDir)\Engine\src</AdditionalIncludeDirectories>
       <UseFullPaths>true</UseFullPaths>
       <AdditionalOptions>/d1trimfile:"$(SolutionDir)\" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -220,23 +220,22 @@
     <ClInclude Include="src\counter.h" />
     <ClInclude Include="src\checkbox.h" />
     <ClInclude Include="src\bot.h" />
-    <ClInclude Include="src\global.h" />
-    <ClInclude Include="src\scenes\menu.h" />
+    <ClInclude Include="src\engine\geometry.h" />
+    <ClInclude Include="src\engine\graphics.h" />
+    <ClInclude Include="src\engine\list.h" />
+    <ClInclude Include="src\engine\math.h" />
+    <ClInclude Include="src\engine\physics.h" />
     <ClInclude Include="src\engine\random.h" />
     <ClInclude Include="src\engine\sound.h" />
+    <ClInclude Include="src\engine\time.h" />
+    <ClInclude Include="src\engine\util.h" />
+    <ClInclude Include="src\engine\window.h" />
+    <ClInclude Include="src\global.h" />
+    <ClInclude Include="src\scenes\menu.h" />
     <ClInclude Include="src\button.h" />
     <ClInclude Include="src\assets.h" />
     <ClInclude Include="src\levels.h" />
     <ClInclude Include="src\cars.h" />
-    <ClInclude Include="src\engine\list.h" />
-    <ClInclude Include="src\engine\geometry.h" />
-    <ClInclude Include="src\engine\graphics.h" />
-    <ClInclude Include="src\engine\math.h" />
-    <ClInclude Include="src\engine\physics.h" />
-    <ClInclude Include="src\engine\platform.h" />
-    <ClInclude Include="src\engine\time.h" />
-    <ClInclude Include="src\engine\util.h" />
-    <ClInclude Include="src\engine\window.h" />
     <ClInclude Include="src\main.h" />
     <ClInclude Include="src\scenes\battle.h" />
     <ClInclude Include="src\scenes\scene.h" />
@@ -246,26 +245,31 @@
     <ClCompile Include="src\counter.c" />
     <ClCompile Include="src\checkbox.c" />
     <ClCompile Include="src\bot.c" />
-    <ClCompile Include="src\global.c" />
-    <ClCompile Include="src\scenes\menu.c" />
+    <ClCompile Include="src\engine\geometry.c" />
+    <ClCompile Include="src\engine\graphics.c" />
+    <ClCompile Include="src\engine\list.c" />
+    <ClCompile Include="src\engine\math.c" />
+    <ClCompile Include="src\engine\physics.c" />
     <ClCompile Include="src\engine\random.c" />
     <ClCompile Include="src\engine\sound.c" />
+    <ClCompile Include="src\engine\time.c" />
+    <ClCompile Include="src\engine\util.c" />
+    <ClCompile Include="src\engine\window.c" />
+    <ClCompile Include="src\global.c" />
+    <ClCompile Include="src\scenes\menu.c" />
     <ClCompile Include="src\button.c" />
     <ClCompile Include="src\assets.c" />
     <ClCompile Include="src\levels.c" />
     <ClCompile Include="src\cars.c" />
-    <ClCompile Include="src\engine\list.c" />
-    <ClCompile Include="src\engine\geometry.c" />
-    <ClCompile Include="src\engine\graphics.c" />
-    <ClCompile Include="src\engine\math.c" />
-    <ClCompile Include="src\engine\physics.c" />
-    <ClCompile Include="src\engine\time.c" />
-    <ClCompile Include="src\engine\util.c" />
-    <ClCompile Include="src\engine\window.c" />
     <ClCompile Include="src\main.c" />
     <ClCompile Include="src\scenes\battle.c" />
     <ClCompile Include="src\scenes\scene.c" />
     <ClCompile Include="src\wheels.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Engine\Engine.vcxproj">
+      <Project>{f28295be-d118-4e09-af32-b994f070fa4c}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -188,6 +188,11 @@ void graphics_clear(const Color* color)
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
+void graphics_unproject(Vector* point)
+{
+	// TODO
+}
+
 void graphics_set_camera(const Rect* rect)
 {
 	glMatrixMode(GL_PROJECTION);
