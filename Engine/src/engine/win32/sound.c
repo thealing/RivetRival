@@ -65,6 +65,20 @@ void sound_destroy(Sound* sound)
 
 bool sound_is_playing(Sound* sound)
 {
+	long code;
+
+	LONG_PTR p1, p2;
+
+	while (sound->event->lpVtbl->GetEvent(sound->event, &code, &p1, &p2, 0) == S_OK)
+	{
+		if (code == EC_COMPLETE)
+		{
+			sound->control->lpVtbl->Stop(sound->control);
+		}
+
+		sound->event->lpVtbl->FreeEventParams(sound->event, code, p1, p2);
+	}
+
 	OAFilterState state = 0;
 
 	sound->control->lpVtbl->GetState(sound->control, 0, &state);
@@ -104,10 +118,24 @@ void sound_stop(Sound* sound)
 
 void sound_pause(Sound* sound)
 {
-	sound->control->lpVtbl->Pause(sound->control);
+	OAFilterState state = 0;
+
+	sound->control->lpVtbl->GetState(sound->control, 0, &state);
+
+	if (state == State_Running)
+	{
+		sound->control->lpVtbl->Pause(sound->control);
+	}
 }
 
 void sound_resume(Sound* sound)
 {
-	sound->control->lpVtbl->Run(sound->control);
+	OAFilterState state = 0;
+
+	sound->control->lpVtbl->GetState(sound->control, 0, &state);
+
+	if (state == State_Paused)
+	{
+		sound->control->lpVtbl->Run(sound->control);
+	}
 }

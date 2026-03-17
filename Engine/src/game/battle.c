@@ -295,8 +295,6 @@ void battle_enter()
 
 	scene_add_button(s_pause);
 
-	sound_play(g_sounds.music);
-
 	on_start();
 }
 
@@ -416,6 +414,11 @@ void battle_update(double delta_time)
 
 	if (!s_paused)
 	{
+		if (!s_over && !sound_is_playing(g_sounds.music))
+		{
+			sound_play(g_sounds.music);
+		}
+
 		if (s_winner == 0)
 		{
 			if (s_blue_car->done && s_red_car->done)

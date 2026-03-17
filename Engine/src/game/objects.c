@@ -149,8 +149,6 @@ Object* object_create_saw(Physics_World* world, Vector position, double radius, 
 
 	saw->radius = radius;
 
-	sound_play(g_sounds.saw);
-
 	return saw;
 }
 
@@ -390,6 +388,11 @@ void object_update(Object* object, double delta_time)
 	{
 		case OBJECT_TYPE_SAW:
 		{
+			if (!sound_is_playing(g_sounds.saw))
+			{
+				sound_play(g_sounds.saw);
+			}
+
 			break;
 		}
 		case OBJECT_TYPE_MINE:

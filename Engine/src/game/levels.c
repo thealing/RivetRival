@@ -589,6 +589,32 @@ void level_update(Level* level, double delta_time)
 		level->mine_spawn_time += random_real_in_range(0.5, 1.5);
 	}
 
+	if (level->armageddon_active)
+	{
+		switch (level->armageddon_type)
+		{
+			case ARMAGEDDON_TYPE_LASER_UP:
+			case ARMAGEDDON_TYPE_LASER_DOWN:
+			{
+				if (!sound_is_playing(g_sounds.laser))
+				{
+					sound_play(g_sounds.laser);
+				}
+
+				break;
+			}
+			case ARMAGEDDON_TYPE_WATER_RISE:
+			{
+				if (!sound_is_playing(g_sounds.water))
+				{
+					sound_play(g_sounds.water);
+				}
+
+				break;
+			}
+		}
+	}
+
 	update_objects(level, delta_time);
 
 	level->time += delta_time;
