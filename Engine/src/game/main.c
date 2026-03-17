@@ -194,7 +194,7 @@ int main()
 			last_measure_time = current_time;
 		}
 
-		int sleep_duration = fmin(last_update_time + update_delta - current_time, last_render_time + render_delta - current_time);
+		double sleep_duration = fmin(last_update_time + update_delta - current_time, last_render_time + render_delta - current_time);
 
 		sleep(sleep_duration);
 	}
