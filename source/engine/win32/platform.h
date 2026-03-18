@@ -1,5 +1,7 @@
 #pragma once
 
+#include "engine/macros.h"
+
 #define byte win32_byte
 
 #define Polygon win32_Polygon
@@ -10,9 +12,9 @@
 
 #include <wincodec.h>
 
-#include <wincrypt.h>
-
 #include <shlobj.h>
+
+#include <shlwapi.h>
 
 #include <dshow.h>
 
@@ -29,3 +31,5 @@
 #undef min
 
 #undef max
+
+void extract_assets(const char* folder_name);

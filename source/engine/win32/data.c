@@ -14,9 +14,9 @@ static const char* get_data_folder()
 
 		if (roaming_path != NULL)
 		{
-			char* path_prefix = config_get_value(CONFIG_KEY_PATH_PREFIX);
+			char* path_prefix = config_get_value(CONFIG_KEY_FOLDER_NAME);
 
-			snprintf(data_folder, PATH_BUFFER_SIZE, "%ls/%hs", roaming_path, path_prefix);
+			snprintf(data_folder, PATH_BUFFER_SIZE, "%ls/%s", roaming_path, path_prefix);
 
 			SHCreateDirectoryEx(NULL, data_folder, NULL);
 
@@ -31,7 +31,7 @@ static const char* get_full_path(const char* path)
 {
 	static char full_path[PATH_BUFFER_SIZE];
 
-	snprintf(full_path, PATH_BUFFER_SIZE, "%hs/%hs", get_data_folder(), path);
+	snprintf(full_path, PATH_BUFFER_SIZE, "%s/%s", get_data_folder(), path);
 
 	return full_path;
 }

@@ -82,11 +82,11 @@ static void on_start()
 
 	s_winner = 0;
 
-	s_level = level_create(g_selected_level == 0 ? random_below(LEVEL_TYPE_COUNT) : g_selected_level - 1, s_world, s_level_group);
+	s_level = level_create(g_save.selected_level == 0 ? random_below(LEVEL_TYPE_COUNT) : g_save.selected_level - 1, s_world, s_level_group);
 
-	s_blue_car = car_create(g_selected_blue_car == 0 ? random_below(CAR_TYPE_COUNT) : g_selected_blue_car - 1, s_world, vector_create(300, 200), s_blue_car_group);
+	s_blue_car = car_create(g_save.selected_blue_car == 0 ? random_below(CAR_TYPE_COUNT) : g_save.selected_blue_car - 1, s_world, vector_create(300, 200), s_blue_car_group);
 
-	s_red_car = car_create(g_selected_red_car == 0 ? random_below(CAR_TYPE_COUNT) : g_selected_red_car - 1, s_world, vector_create(980, 200), s_red_car_group);
+	s_red_car = car_create(g_save.selected_red_car == 0 ? random_below(CAR_TYPE_COUNT) : g_save.selected_red_car - 1, s_world, vector_create(980, 200), s_red_car_group);
 
 	s_blue_contact_time = 1;
 
@@ -193,9 +193,9 @@ void battle_enter()
 
 	s_red_score = 0;
 
-	s_blue_player = !g_blue_is_bot;
+	s_blue_player = !g_save.blue_is_bot;
 
-	s_red_player = !g_red_is_bot;
+	s_red_player = !g_save.red_is_bot;
 
 	s_blue_bot = bot_create();
 
@@ -383,7 +383,7 @@ void battle_update(double delta_time)
 		{
 			if (!s_over && s_win_time > s_death_delay)
 			{
-				if (s_blue_score == g_max_score || s_red_score == g_max_score)
+				if (s_blue_score == g_save.max_score || s_red_score == g_save.max_score)
 				{
 					s_over = true;
 
@@ -426,7 +426,7 @@ void battle_update(double delta_time)
 			{
 				double countdown = ceil(g_sudden_death_time - s_elapsed_time);
 
-				if (countdown > 0 && countdown <= g_sudden_death_countdown)
+				if (countdown > 0 && countdown <= g_save.sudden_death_countdown)
 				{
 					sound_play(g_sounds.blip);
 				}
@@ -499,7 +499,7 @@ void battle_render()
 		draw_physics_world(s_world);
 	}
 
-	for (int i = 0; i < g_max_score; i++)
+	for (int i = 0; i < g_save.max_score; i++)
 	{
 		if (s_blue_score > i)
 		{
@@ -513,7 +513,7 @@ void battle_render()
 		graphics_draw_texture_at(vector_create(40 + i * 60, 680), s_winner == 2 && s_blue_score == i + 1 ? fmax(s_death_delay - s_win_time, 0) * 2 * M_PI : 0);
 	}
 
-	for (int i = 0; i < g_max_score; i++)
+	for (int i = 0; i < g_save.max_score; i++)
 	{
 		if (s_red_score > i)
 		{
@@ -606,7 +606,7 @@ void battle_render()
 				graphics_draw_string_in_rect(&rect, ALIGNMENT_CENTER, "SUDDEN DEATH!");
 			}
 
-			if (countdown > 0 && countdown <= g_sudden_death_countdown)
+			if (countdown > 0 && countdown <= g_save.sudden_death_countdown)
 			{
 				graphics_draw_format_in_rect(&rect, ALIGNMENT_CENTER, "%d", lround(countdown));
 			}

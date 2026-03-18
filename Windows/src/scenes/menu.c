@@ -72,7 +72,7 @@ static void draw_level(Vector center, Vector bottom, double scale)
 {
 	graphics_store();
 
-	if (g_selected_level == 0)
+	if (g_save.selected_level == 0)
 	{
 		graphics_translate(center);
 
@@ -88,7 +88,7 @@ static void draw_level(Vector center, Vector bottom, double scale)
 
 		graphics_scale(create_diagonal(scale));
 
-		level_render(s_levels[g_selected_level - 1]);
+		level_render(s_levels[g_save.selected_level - 1]);
 	}
 
 	graphics_restore();
@@ -101,7 +101,7 @@ static void draw_level(Vector center, Vector bottom, double scale)
 
 	graphics_set_color(&(Color){ 0, 0, 0, 1 });
 
-	graphics_draw_string(ALIGNMENT_CENTER, ALIGNMENT_CENTER, g_selected_level == 0 ? "RANDOM" : s_level_names[g_selected_level - 1]);
+	graphics_draw_string(ALIGNMENT_CENTER, ALIGNMENT_CENTER, g_save.selected_level == 0 ? "RANDOM" : s_level_names[g_save.selected_level - 1]);
 
 	graphics_restore();
 }
@@ -160,17 +160,17 @@ void menu_init()
 
 	s_level_names[LEVEL_TYPE_GAP] = "GAP";
 
-	s_blue_bot = checkbox_create(vector_create(580, 500), 36, &g_blue_is_bot);
+	s_blue_bot = checkbox_create(vector_create(580, 500), 36, &g_save.blue_is_bot);
 
-	s_red_bot = checkbox_create(vector_create(700, 500), 36, &g_red_is_bot);
+	s_red_bot = checkbox_create(vector_create(700, 500), 36, &g_save.red_is_bot);
 
-	s_blue_car = counter_create(vector_create(700, 310), vector_create(30, 24), 0, CAR_TYPE_COUNT, &g_selected_blue_car);
+	s_blue_car = counter_create(vector_create(700, 310), vector_create(30, 24), 0, CAR_TYPE_COUNT, &g_save.selected_blue_car);
 
-	s_red_car = counter_create(vector_create(700, 230), vector_create(30, 24), 0, CAR_TYPE_COUNT, &g_selected_red_car);
+	s_red_car = counter_create(vector_create(700, 230), vector_create(30, 24), 0, CAR_TYPE_COUNT, &g_save.selected_red_car);
 
-	s_level = counter_create(vector_create(700, 150), vector_create(30, 24), 0, LEVEL_TYPE_COUNT, &g_selected_level);
+	s_level = counter_create(vector_create(700, 150), vector_create(30, 24), 0, LEVEL_TYPE_COUNT, &g_save.selected_level);
 
-	s_scores_to_win = counter_create(vector_create(700, 70), vector_create(30, 24), 1, 10, &g_max_score);
+	s_scores_to_win = counter_create(vector_create(700, 70), vector_create(30, 24), 1, 10, &g_save.max_score);
 
 	s_play = button_create(move_shape(shape_create_circle(vector_create(1200, 80), 64)), KEY_ENTER, g_textures.ui_play_pressed, g_textures.ui_play_released, vector_create(1200, 80), 120);
 }
@@ -219,9 +219,9 @@ void menu_render()
 
 	graphics_draw_rect(&(Rect){ 0, 0, 1280, 720 }, true);
 
-	draw_car(vector_create(280, 570), vector_create(280, 440), 1.8, g_selected_blue_car == 0 ? NULL : s_blue_cars[g_selected_blue_car - 1]);
+	draw_car(vector_create(280, 570), vector_create(280, 440), 1.8, g_save.selected_blue_car == 0 ? NULL : s_blue_cars[g_save.selected_blue_car - 1]);
 
-	draw_car(vector_create(1000, 570), vector_create(1000, 440), 1.8, g_selected_red_car == 0 ? NULL : s_red_cars[g_selected_red_car - 1]);
+	draw_car(vector_create(1000, 570), vector_create(1000, 440), 1.8, g_save.selected_red_car == 0 ? NULL : s_red_cars[g_save.selected_red_car - 1]);
 
 	draw_level(vector_create(280, 210), vector_create(280, 80), 0.25);
 

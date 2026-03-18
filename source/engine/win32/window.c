@@ -8,6 +8,8 @@ static Window_Event_Node* s_event_last;
 
 static bool s_window_closed;
 
+static bool s_assets_extracted;
+
 static void push_event(Window_Event* event)
 {
 	if (s_event_last == NULL) 
@@ -161,6 +163,13 @@ LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 void window_create(int width, int height)
 {
+	if (!s_assets_extracted)
+	{
+		s_assets_extracted = true;
+
+		extract_assets(config_get_value(CONFIG_KEY_FOLDER_NAME));
+	}
+
 	HINSTANCE instance = GetModuleHandle(NULL);
 
 	WNDCLASS wc = { 0 };
@@ -245,4 +254,19 @@ int window_get_height(void* window)
 	GetClientRect(window, &rect);
 
 	return rect.bottom - rect.top;
+}
+
+int main();
+
+int WINAPI WinMain(HINSTANCE instance, HINSTANCE previous_instance, LPSTR command_line, int show_mode)
+{
+	UNUSED(instance);
+
+	UNUSED(previous_instance);
+
+	UNUSED(command_line);
+
+	UNUSED(show_mode);
+
+	return main();
 }

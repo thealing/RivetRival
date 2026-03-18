@@ -74,11 +74,13 @@ void scene_update(double delta_time)
 
 		if (input_is_key_pressed('B'))
 		{
-			g_debug_hud = !g_debug_hud;
+			g_save.debug_hud = !g_save.debug_hud;
 
 			sound_play(g_sounds.blip);
 		}
 	}
+
+	save_save();
 }
 
 void scene_render()

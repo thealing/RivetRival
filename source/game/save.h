@@ -4,6 +4,8 @@
 
 #include <stdbool.h>
 
+#include <memory.h>
+
 typedef struct Save Save;
 
 struct Save
@@ -17,6 +19,22 @@ struct Save
 	bool same_random_car;
 
 	int sudden_death_time;
+
+	bool debug_hud;
+
+	int sudden_death_countdown;
+
+	int max_score;
+
+	int selected_level;
+
+	int selected_blue_car;
+
+	int selected_red_car;
+
+	bool blue_is_bot;
+
+	bool red_is_bot;
 };
 
 extern Save g_save;

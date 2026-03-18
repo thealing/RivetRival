@@ -1,7 +1,5 @@
 #pragma once
 
-#include "global.h"
-
 #include "scene.h"
 
 #include "levels.h"

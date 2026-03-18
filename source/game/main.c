@@ -36,7 +36,7 @@ int main()
 
 	config_set_value(CONFIG_KEY_WINDOW_CLASS, "RivetRivalWindowClass");
 
-	config_set_value(CONFIG_KEY_PATH_PREFIX, "RivetRival");
+	config_set_value(CONFIG_KEY_FOLDER_NAME, "RivetRival");
 
 	window_create(1280, 720);
 
@@ -85,8 +85,6 @@ int main()
 						if (!started)
 						{
 							sounds_init();
-
-							global_init();
 
 							menu_init();
 
@@ -211,7 +209,7 @@ void render()
 {
 	scene_render();
 
-	if (g_debug_hud)
+	if (g_save.debug_hud)
 	{
 		graphics_draw_format_in_rect(&(Rect){ 0, 0, 0, 30 }, ALIGNMENT_LEFT, "%5d %3d", lround(s_update_fps), lround(s_render_fps));
 	}

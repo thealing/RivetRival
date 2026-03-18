@@ -6,7 +6,7 @@
 
 #include "counter.h"
 
-#include "global.h"
+#include "save.h"
 
 #include <stddef.h>
 

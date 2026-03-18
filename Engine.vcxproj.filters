@@ -15,199 +15,201 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\engine\data.h">
+    <ClInclude Include="source\engine\config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\geometry.h">
+    <ClInclude Include="source\engine\data.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\graphics.h">
+    <ClInclude Include="source\engine\geometry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\image.h">
+    <ClInclude Include="source\engine\graphics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\list.h">
+    <ClInclude Include="source\engine\image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\math.h">
+    <ClInclude Include="source\engine\list.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\physics.h">
+    <ClInclude Include="source\engine\macros.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\random.h">
+    <ClInclude Include="source\engine\math.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\sound.h">
+    <ClInclude Include="source\engine\physics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\time.h">
+    <ClInclude Include="source\engine\random.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\macros.h">
+    <ClInclude Include="source\engine\sound.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\battle.h">
+    <ClInclude Include="source\engine\time.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\bot.h">
+    <ClInclude Include="source\engine\win32\platform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\button.h">
+    <ClInclude Include="source\engine\window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\cars.h">
+    <ClInclude Include="source\game\battle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\checkbox.h">
+    <ClInclude Include="source\game\bot.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\counter.h">
+    <ClInclude Include="source\game\button.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\defines.h">
+    <ClInclude Include="source\game\cars.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\global.h">
+    <ClInclude Include="source\game\checkbox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\input.h">
+    <ClInclude Include="source\game\counter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\levels.h">
+    <ClInclude Include="source\game\defines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\menu.h">
+    <ClInclude Include="source\engine\input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\objects.h">
+    <ClInclude Include="source\game\levels.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\save.h">
+    <ClInclude Include="source\game\main.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\scene.h">
+    <ClInclude Include="source\game\menu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\settings.h">
+    <ClInclude Include="source\game\objects.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\sounds.h">
+    <ClInclude Include="source\game\save.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\textures.h">
+    <ClInclude Include="source\game\scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\util.h">
+    <ClInclude Include="source\game\settings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\wheels.h">
+    <ClInclude Include="source\game\sounds.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\win32\platform.h">
+    <ClInclude Include="source\game\textures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\main.h">
+    <ClInclude Include="source\game\util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\window.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\config.h">
+    <ClInclude Include="source\game\wheels.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\engine\geometry.c">
+    <ClCompile Include="source\engine\config.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\list.c">
+    <ClCompile Include="source\engine\geometry.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\math.c">
+    <ClCompile Include="source\engine\list.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\physics.c">
+    <ClCompile Include="source\engine\math.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\battle.c">
+    <ClCompile Include="source\engine\physics.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\bot.c">
+    <ClCompile Include="source\engine\win32\data.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\button.c">
+    <ClCompile Include="source\engine\win32\graphics.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\cars.c">
+    <ClCompile Include="source\engine\random.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\checkbox.c">
+    <ClCompile Include="source\engine\win32\sound.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\counter.c">
+    <ClCompile Include="source\engine\win32\time.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\global.c">
+    <ClCompile Include="source\engine\win32\window.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\input.c">
+    <ClCompile Include="source\game\battle.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\levels.c">
+    <ClCompile Include="source\game\bot.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\menu.c">
+    <ClCompile Include="source\game\button.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\objects.c">
+    <ClCompile Include="source\game\cars.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\save.c">
+    <ClCompile Include="source\game\checkbox.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\scene.c">
+    <ClCompile Include="source\game\counter.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\settings.c">
+    <ClCompile Include="source\engine\input.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\sounds.c">
+    <ClCompile Include="source\game\levels.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\textures.c">
+    <ClCompile Include="source\game\main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\util.c">
+    <ClCompile Include="source\game\menu.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\wheels.c">
+    <ClCompile Include="source\game\objects.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\main.c">
+    <ClCompile Include="source\game\save.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\win32\graphics.c">
+    <ClCompile Include="source\game\scene.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\win32\data.c">
+    <ClCompile Include="source\game\settings.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\random.c">
+    <ClCompile Include="source\game\sounds.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\win32\sound.c">
+    <ClCompile Include="source\game\textures.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\win32\time.c">
+    <ClCompile Include="source\game\util.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\win32\window.c">
+    <ClCompile Include="source\game\wheels.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\config.c">
+    <ClCompile Include="source\engine\win32\resources.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="generated\resources.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

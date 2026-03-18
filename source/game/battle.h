@@ -1,7 +1,5 @@
 #pragma once
 
-#include "global.h"
-
 #include "defines.h"
 
 #include "save.h"

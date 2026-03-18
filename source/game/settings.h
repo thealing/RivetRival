@@ -1,7 +1,5 @@
 #pragma once
 
-#include "global.h"
-
 #include "save.h"
 
 #include "scene.h"

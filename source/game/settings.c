@@ -64,8 +64,6 @@ void settings_enter()
 
 void settings_leave()
 {
-	save_save();
-
 	checkbox_destroy(s_music);
 
 	checkbox_destroy(s_sounds);
@@ -162,7 +160,7 @@ void settings_update(double delta_time)
 
 	if (input_is_rect_pressed(&(Rect){ 1080, 0, 1280, 200 }))
 	{
-		g_debug_hud = !g_debug_hud;
+		g_save.debug_hud = !g_save.debug_hud;
 
 		sound_play(g_sounds.blip);
 	}
@@ -198,7 +196,7 @@ void settings_render()
 
 	graphics_draw_string_in_rect(&(Rect){ 260, 240, 0, 300 }, ALIGNMENT_LEFT, "SUDDEN DEATH TIME");
 
-	if (g_debug_hud)
+	if (g_save.debug_hud)
 	{
 		for (int i = 0; i < WINDOW_KEY_MAX; i++)
 		{
