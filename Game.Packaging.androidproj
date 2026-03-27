@@ -228,11 +228,11 @@
     <Content Include="assets\sounds\music.mp3" />
     <Content Include="assets\sounds\saw.mp3" />
     <Content Include="assets\sounds\water.mp3" />
-    <Content Include="res\values\strings.xml" />
-    <AntBuildXml Include="build.xml" />
-    <AndroidManifest Include="AndroidManifest.xml" />
-    <AntProjectPropertiesFile Include="project.properties" />
-    <Content Include="res\values\styles.xml" />
+    <Content Include="platform\android\res\values\strings.xml" />
+    <AntBuildXml Include="platform\android\build.xml" />
+    <AndroidManifest Include="platform\android\AndroidManifest.xml" />
+    <AntProjectPropertiesFile Include="platform\android\project.properties" />
+    <Content Include="platform\android\res\values\styles.xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Game.NativeActivity.vcxproj">
