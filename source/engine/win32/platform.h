@@ -31,5 +31,3 @@
 #undef min
 
 #undef max
-
-void extract_assets(const char* folder_name);

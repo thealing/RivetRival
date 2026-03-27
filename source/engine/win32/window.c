@@ -2,6 +2,8 @@
 
 #include "platform.h"
 
+void extract_assets(const char* folder_name);
+
 static Window_Event_Node* s_event_first;
 
 static Window_Event_Node* s_event_last;
