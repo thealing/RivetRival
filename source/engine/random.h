@@ -6,6 +6,8 @@
 
 #define RANDOM_MAX INT_MAX
 
+void random_set_seed(int seed);
+
 int random_int();
 
 int random_int_below(int x);

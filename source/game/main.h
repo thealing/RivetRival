@@ -14,6 +14,8 @@
 
 #include "battle.h"
 
+#include <time.h>
+
 int main();
 
 void update(double delta_time);

@@ -1,16 +1,21 @@
 #include "random.h"
 
+static unsigned int s_seed = 1;
+
+void random_set_seed(int seed)
+{
+	s_seed = (seed == 0) ? 1 : seed;
+}
+
 int random_int()
 {
-	static unsigned int seed = 1;
+	s_seed ^= s_seed << 13;
 
-	seed ^= seed << 13;
+	s_seed ^= s_seed >> 17;
 
-	seed ^= seed >> 17;
+	s_seed ^= s_seed << 5;
 
-	seed ^= seed << 5;
-
-	int value = seed & RANDOM_MAX;
+	int value = s_seed & RANDOM_MAX;
 
 	return value;
 }

@@ -6,6 +6,8 @@ static double s_render_fps;
 
 int main()
 {
+	random_set_seed(time(NULL));
+
 	void* window = NULL;
 
 	bool started = false;
