@@ -2,6 +2,10 @@
 
 #include "platform.h"
 
+#include <math.h>
+
+#include <stdlib.h>
+
 struct Sound
 {
 	SLObjectItf player_obj;
@@ -41,9 +45,14 @@ Sound* sound_load(const char* path)
 
 	AAsset* asset = AAssetManager_open(asset_manager, path, AASSET_MODE_UNKNOWN);
 
-	off_t start;
+	if (asset == NULL)
+	{
+		return NULL;
+	}
 
-	off_t length;
+	off_t start = 0;
+
+	off_t length = 0;
 
 	int fd = AAsset_openFileDescriptor(asset, &start, &length);
 
@@ -63,13 +72,13 @@ Sound* sound_load(const char* path)
 
 	const SLboolean req[3] = { SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE };
 
-	SLObjectItf player_obj;
+	SLObjectItf player_obj = NULL;
 
-	SLPlayItf play_itf;
+	SLPlayItf play_itf = NULL;
 
-	SLSeekItf seek_itf;
+	SLSeekItf seek_itf = NULL;
 
-	SLVolumeItf volume_itf;
+	SLVolumeItf volume_itf = NULL;
 
 	(*engine_itf)->CreateAudioPlayer(engine_itf, &player_obj, &source, &sink, 3, ids, req);
 
@@ -107,11 +116,16 @@ void sound_destroy(Sound* sound)
 
 bool sound_is_playing(Sound* sound)
 {
-	SLuint32 play_state;
+	SLuint32 play_state = 0;
 
 	(*sound->play_itf)->GetPlayState(sound->play_itf, &play_state);
 
 	return play_state == SL_PLAYSTATE_PLAYING;
+}
+
+void sound_set_volume(Sound* sound, double volume)
+{
+	(*sound->volume_itf)->SetVolumeLevel(sound->volume_itf, (SLmillibel)fmax(log10(volume) * 2000.0, SL_MILLIBEL_MIN));
 }
 
 void sound_play(Sound* sound)
@@ -128,7 +142,7 @@ void sound_stop(Sound* sound)
 
 void sound_pause(Sound* sound)
 {
-	SLuint32 play_state;
+	SLuint32 play_state = 0;
 
 	(*sound->play_itf)->GetPlayState(sound->play_itf, &play_state);
 
@@ -140,7 +154,7 @@ void sound_pause(Sound* sound)
 
 void sound_resume(Sound* sound)
 {
-	SLuint32 play_state;
+	SLuint32 play_state = 0;
 
 	(*sound->play_itf)->GetPlayState(sound->play_itf, &play_state);
 
@@ -148,50 +162,4 @@ void sound_resume(Sound* sound)
 	{
 		(*sound->play_itf)->SetPlayState(sound->play_itf, SL_PLAYSTATE_PLAYING);
 	}
-}
-
-bool sound_is_looping(Sound* sound)
-{
-	SLboolean enabled;
-
-	SLmillisecond start;
-
-	SLmillisecond end;
-
-	(*sound->seek_itf)->GetLoop(sound->seek_itf, &enabled, &start, &end);
-
-	return enabled;
-}
-
-void sound_set_looping(Sound* sound, bool looping)
-{
-	(*sound->seek_itf)->SetLoop(sound->seek_itf, looping, 0, SL_TIME_UNKNOWN);
-}
-
-double sound_get_position(Sound* sound)
-{
-	SLmillisecond position;
-
-	(*sound->play_itf)->GetPosition(sound->play_itf, &position);
-
-	return position / 1000.0;
-}
-
-void sound_set_position(Sound* sound, double position)
-{
-	(*sound->seek_itf)->SetPosition(sound->seek_itf, position * 1000.0, SL_SEEKMODE_ACCURATE);
-}
-
-double sound_get_volume(Sound* sound)
-{
-	SLmillibel volume;
-
-	(*sound->volume_itf)->GetVolumeLevel(sound->volume_itf, &volume);
-
-	return pow(10.0, volume / 2000.0);
-}
-
-void sound_set_volume(Sound* sound, double volume)
-{
-	(*sound->volume_itf)->SetVolumeLevel(sound->volume_itf, fmax(log10(volume) * 2000.0, SL_MILLIBEL_MIN));
 }

@@ -1,10 +1,14 @@
-#include "time.h"
+#include "engine/time.h"
 
 #include "platform.h"
 
+#include <math.h>
+
+#include <time.h>
+
 double get_time()
 {
-	struct timespec ts;
+	struct timespec ts = { 0 };
 
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 
@@ -18,7 +22,7 @@ void sleep(double duration)
 		return;
 	}
 
-	struct timespec ts;
+	struct timespec ts = { 0 };
 
 	ts.tv_sec = floor(duration);
 

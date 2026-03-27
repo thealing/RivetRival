@@ -1,51 +1,51 @@
-#include "android.h"
+#include "engine/window.h"
 
 #include "platform.h"
 
-static bool started;
+static bool s_started;
 
-static pthread_t thread;
+static pthread_t s_thread;
 
-static pthread_mutex_t mutex;
+static pthread_mutex_t s_mutex;
 
-static AInputQueue* input_queue;
+static AInputQueue* s_input_queue;
 
-static Android_Event_Node* first;
+static Window_Event_Node* s_event_first;
 
-static Android_Event_Node* last;
+static Window_Event_Node* s_event_last;
 
-static void push_event(Android_Event* event)
+static void push_event(Window_Event* event)
 {
-	if (last == NULL) 
+	if (s_event_last == NULL) 
 	{
-		first = malloc(sizeof(Android_Event_Node));
+		s_event_first = malloc(sizeof(Window_Event_Node));
 
-		last = first;
+		s_event_last = s_event_first;
 	}
 	else 
 	{
-		last->next = malloc(sizeof(Android_Event_Node));
+		s_event_last->next = malloc(sizeof(Window_Event_Node));
 
-		last = last->next;
+		s_event_last = s_event_last->next;
 	}
 
-	last->event = *event;
+	s_event_last->event = *event;
 
-	last->next = NULL;
+	s_event_last->next = NULL;
 }
 
 static void collect_input_events()
 {
-	if (input_queue == NULL) 
+	if (s_input_queue == NULL) 
 	{
 		return;
 	}
 
-	while (AInputQueue_hasEvents(input_queue) > 0) 
+	while (AInputQueue_hasEvents(s_input_queue) > 0) 
 	{
 		AInputEvent* input_event;
 
-		AInputQueue_getEvent(input_queue, &input_event);
+		AInputQueue_getEvent(s_input_queue, &input_event);
 
 		bool handled = true;
 
@@ -55,7 +55,7 @@ static void collect_input_events()
 			{
 				int action = AMotionEvent_getAction(input_event) & AMOTION_EVENT_ACTION_MASK;
 
-				Android_Event_Type type = ANDROID_EVENT_UNKNOWN;
+				Window_Event_Type type = WINDOW_EVENT_UNKNOWN;
 
 				switch (action)
 				{
@@ -63,7 +63,7 @@ static void collect_input_events()
 					case AMOTION_EVENT_ACTION_POINTER_DOWN:
 					case AMOTION_EVENT_ACTION_BUTTON_PRESS:
 					{
-						type = ANDROID_EVENT_TOUCH_DOWN;
+						type = WINDOW_EVENT_TOUCH_DOWN;
 
 						break;
 					}
@@ -72,13 +72,13 @@ static void collect_input_events()
 					case AMOTION_EVENT_ACTION_BUTTON_RELEASE:
 					case AMOTION_EVENT_ACTION_CANCEL:
 					{
-						type = ANDROID_EVENT_TOUCH_UP;
+						type = WINDOW_EVENT_TOUCH_UP;
 
 						break;
 					}
 					case AMOTION_EVENT_ACTION_MOVE:
 					{
-						type = ANDROID_EVENT_TOUCH_MOVE;
+						type = WINDOW_EVENT_TOUCH_MOVE;
 
 						break;
 					}
@@ -86,22 +86,22 @@ static void collect_input_events()
 
 				switch (type)
 				{
-					case ANDROID_EVENT_TOUCH_DOWN:
-					case ANDROID_EVENT_TOUCH_UP:
+					case WINDOW_EVENT_TOUCH_DOWN:
+					case WINDOW_EVENT_TOUCH_UP:
 					{
 						int pointer = AMotionEvent_getAction(input_event) >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
 
 						int index = AMotionEvent_getPointerId(input_event, pointer);
 
-						float x = AMotionEvent_getX(input_event, pointer);
+						double x = AMotionEvent_getX(input_event, pointer);
 
-						float y = AMotionEvent_getY(input_event, pointer);
+						double y = AMotionEvent_getY(input_event, pointer);
 
-						push_event(&(Android_Event){ .type = type, .touch_event = { .index = index, .x = x, .y = y } });
+						push_event(&(Window_Event){ .type = type, .touch_event = { .index = index, .x = x, .y = y } });
 
 						break;
 					}
-					case ANDROID_EVENT_TOUCH_MOVE:
+					case WINDOW_EVENT_TOUCH_MOVE:
 					{
 						int pointer_count = AMotionEvent_getPointerCount(input_event);
 
@@ -109,11 +109,11 @@ static void collect_input_events()
 						{
 							int index = AMotionEvent_getPointerId(input_event, pointer);
 
-							float x = AMotionEvent_getX(input_event, pointer);
+							double x = AMotionEvent_getX(input_event, pointer);
 
-							float y = AMotionEvent_getY(input_event, pointer);
+							double y = AMotionEvent_getY(input_event, pointer);
 
-							push_event(&(Android_Event){ .type = type, .touch_event = { .index = index, .x = x, .y = y } });
+							push_event(&(Window_Event){ .type = type, .touch_event = { .index = index, .x = x, .y = y } });
 						}
 
 						break;
@@ -126,19 +126,19 @@ static void collect_input_events()
 			{
 				int action = AKeyEvent_getAction(input_event);
 
-				Android_Event_Type type = ANDROID_EVENT_UNKNOWN;
+				Window_Event_Type type = WINDOW_EVENT_UNKNOWN;
 
 				switch (action)
 				{
 					case AKEY_EVENT_ACTION_DOWN:
 					{
-						type = ANDROID_EVENT_KEY_DOWN;
+						type = WINDOW_EVENT_KEY_DOWN;
 
 						break;
 					}
 					case AKEY_EVENT_ACTION_UP:
 					{
-						type = ANDROID_EVENT_KEY_UP;
+						type = WINDOW_EVENT_KEY_UP;
 
 						break;
 					}
@@ -146,9 +146,7 @@ static void collect_input_events()
 
 				int key_code = AKeyEvent_getKeyCode(input_event);
 
-				Android_Key key = ANDROID_KEY_UNKNOWN;
-
-				// TODO: copy whole enum from keycodes.h?
+				Window_Key key = WINDOW_KEY_UNKNOWN;
 
 				switch (key_code)
 				{
@@ -161,50 +159,50 @@ static void collect_input_events()
 					}
 					case AKEYCODE_BACK:
 					{
-						key = ANDROID_KEY_BACK;
+						key = WINDOW_KEY_BACK;
 
 						break;
 					}
 					case AKEYCODE_ENTER:
 					case AKEYCODE_DPAD_CENTER:
 					{
-						key = ANDROID_KEY_ENTER;
+						key = WINDOW_KEY_ENTER;
 
 						break;
 					}
 					case AKEYCODE_SPACE:
 					{
-						key = ANDROID_KEY_SPACE;
+						key = WINDOW_KEY_SPACE;
 
 						break;
 					}
 					case AKEYCODE_DEL:
 					{
-						key = ANDROID_KEY_BACKSPACE;
+						key = WINDOW_KEY_BACKSPACE;
 
 						break;
 					}
 					case AKEYCODE_DPAD_LEFT:
 					{
-						key = ANDROID_KEY_LEFT;
+						key = WINDOW_KEY_LEFT;
 
 						break;
 					}
 					case AKEYCODE_DPAD_RIGHT:
 					{
-						key = ANDROID_KEY_RIGHT;
+						key = WINDOW_KEY_RIGHT;
 
 						break;
 					}
 					case AKEYCODE_DPAD_UP:
 					{
-						key = ANDROID_KEY_UP;
+						key = WINDOW_KEY_UP;
 
 						break;
 					}
 					case AKEYCODE_DPAD_DOWN:
 					{
-						key = ANDROID_KEY_DOWN;
+						key = WINDOW_KEY_DOWN;
 
 						break;
 					}
@@ -212,94 +210,100 @@ static void collect_input_events()
 					{
 						if (key_code >= AKEYCODE_0 && key_code <= AKEYCODE_9)
 						{
-							key = '0' + key_code - AKEYCODE_0;
+							key = (Window_Key)('0' + key_code - AKEYCODE_0);
 						}
 
 						if (key_code >= AKEYCODE_A && key_code <= AKEYCODE_Z)
 						{
-							key = 'A' + key_code - AKEYCODE_A;
+							key = (Window_Key)('A' + key_code - AKEYCODE_A);
 						}
 					}
 				}
 
-				push_event(&(Android_Event){ .type = type, .key_event = { .key = key } });
+				push_event(&(Window_Event){ .type = type, .key_event = { .key = key } });
 
 				break;
 			}
 		}
 
-		AInputQueue_finishEvent(input_queue, input_event, handled);
+		AInputQueue_finishEvent(s_input_queue, input_event, handled);
 	}
 }
 
 static void on_destroy(ANativeActivity* activity)
 {
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&s_mutex);
 
-	push_event(&(Android_Event){ .type = ANDROID_EVENT_PAUSED });
+	push_event(&(Window_Event){ .type = WINDOW_EVENT_PAUSED });
 
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&s_mutex);
 }
 
 static void on_pause(ANativeActivity* activity)
 {
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&s_mutex);
 
-	push_event(&(Android_Event){ .type = ANDROID_EVENT_PAUSED });
+	push_event(&(Window_Event){ .type = WINDOW_EVENT_PAUSED });
 
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&s_mutex);
 }
 
 static void on_resume(ANativeActivity* activity)
 {
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&s_mutex);
 
-	push_event(&(Android_Event){ .type = ANDROID_EVENT_RESUMED });
+	push_event(&(Window_Event){ .type = WINDOW_EVENT_RESUMED });
 
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&s_mutex);
 }
 
 static void on_native_window_created(ANativeActivity* activity, ANativeWindow* window)
 {
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&s_mutex);
 
-	push_event(&(Android_Event){ .type = ANDROID_EVENT_WINDOW_CREATED, .window_event = { .window = window } });
+	push_event(&(Window_Event){ .type = WINDOW_EVENT_WINDOW_CREATED, .state_event = { .window = window } });
 
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&s_mutex);
 }
 
 static void on_native_window_destroyed(ANativeActivity* activity, ANativeWindow* window)
 {
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&s_mutex);
 
-	push_event(&(Android_Event){ .type = ANDROID_EVENT_WINDOW_DESTROYED, .window_event = { .window = window } });
+	push_event(&(Window_Event){ .type = WINDOW_EVENT_WINDOW_DESTROYED, .state_event = { .window = window } });
 
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&s_mutex);
 }
 
 static void on_input_queue_created(ANativeActivity* activity, AInputQueue* queue)
 {
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&s_mutex);
 
-	input_queue = queue;
+	s_input_queue = queue;
 
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&s_mutex);
 }
 
 static void on_input_queue_destroyed(ANativeActivity* activity, AInputQueue* queue)
 {
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&s_mutex);
 
-	input_queue = NULL;
+	s_input_queue = NULL;
 
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&s_mutex);
 }
 
-static void entry(ANativeActivity* activity)
+int main();
+
+static void* entry(void* context)
 {
+	ANativeActivity* activity = (ANativeActivity*)context;
+
 	platform_init(activity);
 
-	android_main();
+	main();
+
+	return NULL;
 }
 
 __attribute__((visibility("default"))) void ANativeActivity_onCreate(ANativeActivity* activity, void* saved_state, size_t saved_state_size)
@@ -318,45 +322,64 @@ __attribute__((visibility("default"))) void ANativeActivity_onCreate(ANativeActi
 
 	activity->callbacks->onInputQueueDestroyed = on_input_queue_destroyed;
 
-	if (!started)
+	if (!s_started)
 	{
-		started = true;
+		s_started = true;
 
-		pthread_mutex_init(&mutex, NULL);
+		pthread_mutex_init(&s_mutex, NULL);
 
-		pthread_create(&thread, NULL, entry, activity);
+		pthread_create(&s_thread, NULL, entry, activity);
 	}
 }
 
-bool android_poll_event(Android_Event* event)
+bool window_poll_event(Window_Event* event)
 {
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&s_mutex);
 
 	collect_input_events();
 
-	bool result = first != NULL;
+	bool result = s_event_first != NULL;
 
 	if (result) 
 	{
-		*event = first->event;
+		*event = s_event_first->event;
 
-		Android_Event_Node* next = first->next;
+		Window_Event_Node* next = s_event_first->next;
 
-		free(first);
+		free(s_event_first);
 
 		if (next == NULL)
 		{
-			first = NULL;
+			s_event_first = NULL;
 
-			last = NULL;
+			s_event_last = NULL;
 		}
 		else
 		{
-			first = next;
+			s_event_first = next;
 		}
 	}
 
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&s_mutex);
 
 	return result;
+}
+
+void window_create(int width, int height)
+{
+}
+
+bool window_is_open()
+{
+	return true;
+}
+
+int window_get_width(void* window)
+{
+	return ANativeWindow_getWidth(window);
+}
+
+int window_get_height(void* window)
+{
+	return ANativeWindow_getHeight(window);
 }

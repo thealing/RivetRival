@@ -2,17 +2,27 @@
 
 #include "platform.h"
 
-static EGLDisplay display;
+#include <math.h>
 
-static EGLSurface surface;
+#include <stdlib.h>
 
-static EGLDisplay context;
+#include <string.h>
 
-static State current_state;
+#include <stdarg.h>
 
-static State state_history[GRAPHICS_HISTORY_SIZE];
+static EGLDisplay s_display;
 
-static int state_history_index;
+static EGLSurface s_surface;
+
+static EGLContext s_context;
+
+static State s_state;
+
+static State s_state_history[GRAPHICS_HISTORY_SIZE];
+
+static int s_state_history_index;
+
+static Rect s_camera;
 
 void texture_create_from_image(Texture** texture_pointer, const Image* image)
 {
@@ -21,13 +31,17 @@ void texture_create_from_image(Texture** texture_pointer, const Image* image)
 		*texture_pointer = malloc(sizeof(Texture));
 	}
 
-	(*texture_pointer)->size = vector_create(image->width, image->height);
+	Texture* texture = *texture_pointer;
 
-	(*texture_pointer)->center = vector_create(image->width / 2.0, image->height / 2.0);
+	texture->size = vector_create(image->width, image->height);
 
-	glGenTextures(1, &(*texture_pointer)->id);
+	texture->center = vector_create(image->width / 2.0, image->height / 2.0);
 
-	glBindTexture(GL_TEXTURE_2D, (*texture_pointer)->id);
+	texture->scale = vector_create(1.0, 1.0);
+
+	glGenTextures(1, &texture->id);
+
+	glBindTexture(GL_TEXTURE_2D, texture->id);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->width, image->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image->pixels);
 
@@ -121,13 +135,13 @@ void texture_align(Texture* texture, Alignment horizontal_alignment, Alignment v
 
 void graphics_init(void* window)
 {
-	display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+	s_display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
-	int egl_version_major;
+	EGLint major = 0;
+	
+	EGLint minor = 0;
 
-	int egl_version_minor;
-
-	eglInitialize(display, &egl_version_major, &egl_version_minor);
+	eglInitialize(s_display, &major, &minor);
 
 	const EGLint attribs[] = {
 		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
@@ -135,20 +149,21 @@ void graphics_init(void* window)
 		EGL_GREEN_SIZE, 8,
 		EGL_BLUE_SIZE, 8,
 		EGL_ALPHA_SIZE, 8,
+		EGL_DEPTH_SIZE, 16,
 		EGL_NONE,
 	};
 
-	EGLConfig config;
+	EGLConfig config = 0;
 
-	int num_config;
+	int num_config = 0;
 
-	eglChooseConfig(display, attribs, &config, 1, &num_config);
+	eglChooseConfig(s_display, attribs, &config, 1, &num_config);
 
-	surface = eglCreateWindowSurface(display, config, window, NULL);
+	s_surface = eglCreateWindowSurface(s_display, config, window, NULL);
 
-	context = eglCreateContext(display, config, NULL, NULL);
+	s_context = eglCreateContext(s_display, config, NULL, NULL);
 
-	eglMakeCurrent(display, surface, surface, context);
+	eglMakeCurrent(s_display, s_surface, s_surface, s_context);
 
 	glEnable(GL_BLEND);
 
@@ -163,38 +178,42 @@ void graphics_init(void* window)
 
 void graphics_uninit(void* window)
 {
-	eglDestroyContext(display, context);
+	eglMakeCurrent(s_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
-	eglDestroySurface(display, surface);
+	eglDestroyContext(s_display, s_context);
 
-	eglTerminate(display);
+	eglDestroySurface(s_display, s_surface);
 
-	display = EGL_NO_DISPLAY;
+	eglTerminate(s_display);
 
-	context = EGL_NO_CONTEXT;
+	s_display = EGL_NO_DISPLAY;
 
-	surface = EGL_NO_SURFACE;
+	s_context = EGL_NO_CONTEXT;
+
+	s_surface = EGL_NO_SURFACE;
 }
 
 void graphics_display()
 {
-	eglSwapBuffers(display, surface);
+	eglSwapBuffers(s_display, s_surface);
 }
 
 void graphics_clear(const Color* color)
 {
 	glClearColor(color->red, color->green, color->blue, color->alpha);
 
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void graphics_unproject(Vector* point)
 {
-	// TODO
+	*point = vector_add(s_camera.min, vector_scale(vector_subtract(s_camera.max, s_camera.min), *point));
 }
 
 void graphics_set_camera(const Rect* rect)
 {
+	s_camera = *rect;
+
 	glMatrixMode(GL_PROJECTION);
 
 	glLoadIdentity();
@@ -206,19 +225,19 @@ void graphics_set_camera(const Rect* rect)
 
 void graphics_set_color(const Color* color)
 {
-	current_state.color = *color;
+	s_state.color = *color;
 
 	glColor4f(color->red, color->green, color->blue, color->alpha);
 }
 
 void graphics_set_texture(const Texture* texture)
 {
-	if (current_state.texture == texture) 
+	if (s_state.texture == texture) 
 	{
 		return;
 	}
 
-	current_state.texture = texture;
+	s_state.texture = texture;
 
 	if (texture != NULL)
 	{
@@ -232,31 +251,31 @@ void graphics_set_texture(const Texture* texture)
 
 void graphics_set_font(const Texture* font)
 {
-	current_state.font = font;
+	s_state.font = font;
 }
 
 void graphics_set_line_width(double line_width)
 {
-	current_state.line_width = line_width;
+	s_state.line_width = line_width;
 }
 
 void graphics_set_line_cap(Line_Cap line_cap)
 {
-	current_state.line_cap = line_cap;
+	s_state.line_cap = line_cap;
 }
 
 void graphics_save_state()
 {
-	state_history[state_history_index] = current_state;
+	s_state_history[s_state_history_index] = s_state;
 
-	state_history_index++;
+	s_state_history_index++;
 }
 
 void graphics_load_state()
 {
-	state_history_index--;
+	s_state_history_index--;
 
-	State state = state_history[state_history_index];
+	State state = s_state_history[s_state_history_index];
 
 	graphics_set_color(&state.color);
 
@@ -315,7 +334,7 @@ void graphics_draw_segment(const Segment* segment, bool fill)
 
 void graphics_draw_circle(const Circle* circle, bool fill)
 {
-	GLfloat vertices[GRAPHICS_CIRCLE_RESOLUTION + 2][2];
+	GLfloat vertices[GRAPHICS_CIRCLE_RESOLUTION + 2][2] = { 0 };
 
 	vertices[0][0] = circle->center.x;
 
@@ -361,15 +380,21 @@ void graphics_draw_shape(const Shape* shape, bool fill)
 	{
 		case SHAPE_TYPE_SEGMENT: 
 		{
-			return graphics_draw_segment(&shape->segment, fill);
+			graphics_draw_segment(&shape->segment, fill);
+
+			break;
 		}
 		case SHAPE_TYPE_CIRCLE: 
 		{
-			return graphics_draw_circle(&shape->circle, fill);
+			graphics_draw_circle(&shape->circle, fill);
+
+			break;
 		}
 		case SHAPE_TYPE_POLYGON: 
 		{
-			return graphics_draw_polygon(&shape->polygon, fill);
+			graphics_draw_polygon(&shape->polygon, fill);
+
+			break;
 		}
 	}
 }
@@ -404,14 +429,14 @@ void graphics_draw_quad(const Vector quad[4], bool fill)
 
 void graphics_draw_texture()
 {
-	if (current_state.texture == NULL)
+	if (s_state.texture == NULL)
 	{
 		return;
 	}
 
-	Vector center = current_state.texture->center;
+	Vector center = s_state.texture->center;
 
-	Vector size = current_state.texture->size;
+	Vector size = s_state.texture->size;
 
 	GLfloat vertices[] = {
 		-center.x, -center.y,
@@ -436,7 +461,7 @@ void graphics_draw_texture()
 
 void graphics_draw_texture_at(Vector position, double rotation)
 {
-	if (current_state.texture == NULL)
+	if (s_state.texture == NULL)
 	{
 		return;
 	}
@@ -454,7 +479,7 @@ void graphics_draw_texture_at(Vector position, double rotation)
 
 void graphics_draw_texture_in_rect(const Rect* rect)
 {
-	if (current_state.texture == NULL)
+	if (s_state.texture == NULL)
 	{
 		return;
 	}
@@ -482,7 +507,7 @@ void graphics_draw_texture_in_rect(const Rect* rect)
 
 void graphics_draw_texture_in_quad(const Vector quad[4])
 {
-	if (current_state.texture == NULL)
+	if (s_state.texture == NULL)
 	{
 		return;
 	}
@@ -510,7 +535,7 @@ void graphics_draw_texture_in_quad(const Vector quad[4])
 
 void graphics_draw_texture_rect_in_rect(const Rect* texture_rect, const Rect* rect)
 {
-	if (current_state.texture == NULL)
+	if (s_state.texture == NULL)
 	{
 		return;
 	}
@@ -538,7 +563,7 @@ void graphics_draw_texture_rect_in_rect(const Rect* texture_rect, const Rect* re
 
 void graphics_draw_texture_rect_in_quad(const Rect* texture_rect, const Vector quad[4])
 {
-	if (current_state.texture == NULL)
+	if (s_state.texture == NULL)
 	{
 		return;
 	}
@@ -566,7 +591,7 @@ void graphics_draw_texture_rect_in_quad(const Rect* texture_rect, const Vector q
 
 void graphics_draw_texture_quad_in_quad(const Vector texture_quad[4], const Vector quad[4])
 {
-	if (current_state.texture == NULL)
+	if (s_state.texture == NULL)
 	{
 		return;
 	}
@@ -594,28 +619,26 @@ void graphics_draw_texture_quad_in_quad(const Vector texture_quad[4], const Vect
 
 void graphics_draw_character_in_rect(const Rect* rect, char character)
 {
-	if (current_state.font == NULL)
+	if (s_state.font == NULL)
 	{
 		return;
 	}
 
-	// TODO: draw font without replacing the current texture
-
-	graphics_set_texture(current_state.font);
+	graphics_set_texture(s_state.font);
 
 	graphics_draw_texture_rect_in_rect(&(Rect){ character / 128.0, 0.0, (character + 1) / 128.0, 1.0 }, rect);
 }
 
 void graphics_draw_string_in_rect(const Rect* rect, Alignment alignment, const char* string)
 {
-	if (current_state.font == NULL)
+	if (s_state.font == NULL)
 	{
 		return;
 	}
 
 	int string_length = strlen(string);
 
-	double character_width = (rect->max.y - rect->min.y) / current_state.font->size.y * (current_state.font->size.x / 128.0);
+	double character_width = (rect->max.y - rect->min.y) / s_state.font->size.y * (s_state.font->size.x / 128.0);
 
 	switch (alignment)
 	{
@@ -653,12 +676,12 @@ void graphics_draw_string_in_rect(const Rect* rect, Alignment alignment, const c
 
 void graphics_draw_format_in_rect(const Rect* rect, Alignment alignment, const char* format, ...)
 {
-	if (current_state.font == NULL)
+	if (s_state.font == NULL)
 	{
 		return;
 	}
 
-	char string[120];
+	char string[GRAPHICS_STRING_BUFFER_SIZE] = { 0 };
 
 	va_list args;
 
@@ -673,14 +696,14 @@ void graphics_draw_format_in_rect(const Rect* rect, Alignment alignment, const c
 
 void graphics_draw_string(Alignment horizontal_alignment, Alignment vertical_alignment, const char* string)
 {
-	if (current_state.font == NULL)
+	if (s_state.font == NULL)
 	{
 		return;
 	}
 
 	int string_length = strlen(string);
 
-	double character_width = (current_state.font->size.x / 128.0) / current_state.font->size.y;
+	double character_width = (s_state.font->size.x / 128.0) / s_state.font->size.y;
 
 	double start_x = 0.0;
 
@@ -746,12 +769,12 @@ void graphics_draw_string(Alignment horizontal_alignment, Alignment vertical_ali
 
 void graphics_draw_format(Alignment horizontal_alignment, Alignment vertical_alignment, const char* format, ...)
 {
-	if (current_state.font == NULL)
+	if (s_state.font == NULL)
 	{
 		return;
 	}
 
-	char string[120];
+	char string[GRAPHICS_STRING_BUFFER_SIZE] = { 0 };
 
 	va_list args;
 
@@ -766,13 +789,13 @@ void graphics_draw_format(Alignment horizontal_alignment, Alignment vertical_ali
 
 void graphics_draw_line(Vector start, Vector end)
 {
-	double radius = current_state.line_width;
+	double radius = s_state.line_width;
 
 	Vector direction = vector_multiply(vector_normalize(vector_subtract(end, start)), radius);
 
 	Vector normal = vector_left(direction);
 
-	if (current_state.line_cap == LINE_CAP_SQUARE)
+	if (s_state.line_cap == LINE_CAP_SQUARE)
 	{
 		start = vector_subtract(start, direction);
 
@@ -789,7 +812,7 @@ void graphics_draw_line(Vector start, Vector end)
 
 	graphics_draw_quad((Vector[4]){ a, b, c, d }, true);
 
-	if (current_state.line_cap == LINE_CAP_ROUND)
+	if (s_state.line_cap == LINE_CAP_ROUND)
 	{
 		graphics_draw_circle(&(Circle){ start, radius }, true);
 

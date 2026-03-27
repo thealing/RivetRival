@@ -2,9 +2,18 @@
 
 #include "platform.h"
 
+#include <stdlib.h>
+
+#include <string.h>
+
 Image* image_load(const char* path)
 {
 	AAsset* asset = AAssetManager_open(asset_manager, path, AASSET_MODE_BUFFER);
+
+	if (asset == NULL)
+	{
+		return NULL;
+	}
 
 	const void* data = AAsset_getBuffer(asset);
 
@@ -13,8 +22,6 @@ Image* image_load(const char* path)
 	jbyteArray j_byte_array = (*env)->NewByteArray(env, length);
 
 	(*env)->SetByteArrayRegion(env, j_byte_array, 0, length, (jbyte*)data);
-
-	jobject j_byte_array_input_stream = (*env)->NewObject(env, ByteArrayInputStream, ByteArrayInputStream_init, j_byte_array);
 
 	jobject j_bitmap = (*env)->CallStaticObjectMethod(env, BitmapFactory, BitmapFactory_decodeByteArray, j_byte_array, 0, length);
 
@@ -45,9 +52,9 @@ Image* image_load(const char* path)
 
 	for (int i = 0; i < size; i++)
 	{
-		char blue = image->pixels[i].red;
+		uint8_t blue = image->pixels[i].red;
 
-		char red = image->pixels[i].blue;
+		uint8_t red = image->pixels[i].blue;
 
 		image->pixels[i].red = red;
 
@@ -59,8 +66,6 @@ Image* image_load(const char* path)
 	(*env)->DeleteLocalRef(env, j_pixel_array);
 
 	(*env)->DeleteLocalRef(env, j_bitmap);
-
-	(*env)->DeleteLocalRef(env, j_byte_array_input_stream);
 
 	(*env)->DeleteLocalRef(env, j_byte_array);
 

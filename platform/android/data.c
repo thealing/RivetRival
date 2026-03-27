@@ -2,6 +2,10 @@
 
 #include "platform.h"
 
+#include <stdio.h>
+
+#include <string.h>
+
 static const char* get_data_folder()
 {
 	static const char* data_folder;
@@ -20,13 +24,9 @@ static const char* get_data_folder()
 
 static const char* get_full_path(const char* path)
 {
-	static char full_path[1024];
+	static char full_path[DATA_PATH_LENGTH];
 
-	strcpy(full_path, get_data_folder());
-
-	strcat(full_path, "/");
-
-	strcat(full_path, path);
+	snprintf(full_path, DATA_PATH_LENGTH, "%s/%s", get_data_folder(), path);
 
 	return full_path;
 }
@@ -40,7 +40,7 @@ int data_write(const char* path, void* buffer, int buffer_size)
 		return -1;
 	}
 
-	int result = fwrite(buffer, 1, buffer_size, file);
+	int result = (int)fwrite(buffer, 1, buffer_size, file);
 
 	fclose(file);
 
@@ -56,7 +56,7 @@ int data_read(const char* path, void* buffer, int buffer_size)
 		return -1;
 	}
 
-	int result = fread(buffer, 1, buffer_size, file);
+	int result = (int)fread(buffer, 1, buffer_size, file);
 
 	fclose(file);
 

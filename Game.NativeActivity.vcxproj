@@ -40,15 +40,12 @@
     <ClCompile Include="platform\android\graphics.c" />
     <ClCompile Include="platform\android\image.c" />
     <ClCompile Include="platform\android\platform.c" />
-    <ClCompile Include="platform\android\random.c" />
     <ClCompile Include="platform\android\sound.c" />
     <ClCompile Include="platform\android\time.c" />
     <ClCompile Include="platform\android\window.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="platform\android\android.h" />
     <ClInclude Include="platform\android\platform.h" />
-    <ClInclude Include="platform\android\window.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2C5E86F3-4995-4CC2-922B-31FADE1ED91C}</ProjectGuid>
