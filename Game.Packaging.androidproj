@@ -119,6 +119,7 @@
     <AntPackage>
       <AndroidAppLibName>$(RootNamespace)</AndroidAppLibName>
       <ApplicationName>rivetrival</ApplicationName>
+      <AntTarget>release</AntTarget>
     </AntPackage>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
@@ -131,6 +132,7 @@
     <AntPackage>
       <AndroidAppLibName>$(RootNamespace)</AndroidAppLibName>
       <ApplicationName>rivetrival</ApplicationName>
+      <AntTarget>release</AntTarget>
     </AntPackage>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -143,6 +145,7 @@
     <AntPackage>
       <AndroidAppLibName>$(RootNamespace)</AndroidAppLibName>
       <ApplicationName>rivetrival</ApplicationName>
+      <AntTarget>release</AntTarget>
     </AntPackage>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
@@ -155,6 +158,7 @@
     <AntPackage>
       <AndroidAppLibName>$(RootNamespace)</AndroidAppLibName>
       <ApplicationName>rivetrival</ApplicationName>
+      <AntTarget>release</AntTarget>
     </AntPackage>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -236,8 +240,14 @@
     <Content Include="assets\sounds\music.mp3" />
     <Content Include="assets\sounds\saw.mp3" />
     <Content Include="assets\sounds\water.mp3" />
+    <Content Include="platform\android\game.keystore">
+      <Link>game.keystore</Link>
+    </Content>
     <Content Include="platform\android\res\values\strings.xml">
       <Link>res\values\strings.xml</Link>
+    </Content>
+    <Content Include="platform\android\res\values\styles.xml">
+      <Link>res\values\styles.xml</Link>
     </Content>
     <AntBuildXml Include="platform\android\build.xml">
       <Link>build.xml</Link>
@@ -248,9 +258,6 @@
     <AntProjectPropertiesFile Include="platform\android\project.properties">
       <Link>project.properties</Link>
     </AntProjectPropertiesFile>
-    <Content Include="platform\android\res\values\styles.xml">
-      <Link>res\values\styles.xml</Link>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Game.NativeActivity.vcxproj">
