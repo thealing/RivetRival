@@ -94,7 +94,7 @@ Sound* sound_load(const char* path)
 
 	(*play_itf)->SetCallbackEventsMask(play_itf, SL_PLAYEVENT_HEADATEND);
 
-	Sound* sound = malloc(sizeof(Sound));
+	Sound* sound = HEAPALLOC(sizeof(Sound));
 
 	sound->player_obj = player_obj;
 

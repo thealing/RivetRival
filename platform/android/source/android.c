@@ -18,13 +18,13 @@ static void push_event(Window_Event* event)
 {
 	if (s_event_last == NULL) 
 	{
-		s_event_first = malloc(sizeof(Window_Event_Node));
+		s_event_first = HEAPALLOC(sizeof(Window_Event_Node));
 
 		s_event_last = s_event_first;
 	}
 	else 
 	{
-		s_event_last->next = malloc(sizeof(Window_Event_Node));
+		s_event_last->next = HEAPALLOC(sizeof(Window_Event_Node));
 
 		s_event_last = s_event_last->next;
 	}

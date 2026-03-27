@@ -1,5 +1,7 @@
 #pragma once
 
+#include "engine/macros.h"
+
 #include <android/log.h>
 
 #include <android/native_activity.h>
@@ -13,8 +15,6 @@
 #include <SLES/OpenSLES.h>
 
 #include <SLES/OpenSLES_Android.h>
-
-#include <malloc.h>
 
 #include <pthread.h>
 

@@ -37,13 +37,13 @@ Image* image_load(const char* path)
 
 	jint* j_pixels = (*env)->GetIntArrayElements(env, j_pixel_array, NULL);
 
-	Image* image = malloc(sizeof(Image));
+	Image* image = HEAPALLOC(sizeof(Image));
 
 	image->width = width;
 
 	image->height = height;
 
-	image->pixels = malloc(size * sizeof(Pixel));
+	image->pixels = HEAPALLOC(size * sizeof(Pixel));
 
 	for (int i = 0; i < height; i++)
 	{

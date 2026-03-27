@@ -28,7 +28,7 @@ void texture_create_from_image(Texture** texture_pointer, const Image* image)
 {
 	if (*texture_pointer == NULL)
 	{
-		*texture_pointer = malloc(sizeof(Texture));
+		*texture_pointer = HEAPALLOC(sizeof(Texture));
 	}
 
 	Texture* texture = *texture_pointer;
