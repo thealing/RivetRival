@@ -128,7 +128,15 @@ int main()
 					}
 					case WINDOW_EVENT_TOUCH_DOWN:
 					{
+						double width = window_get_width(window);
+
+						double height = window_get_height(window);
+
 						Touch* touch = input_get_touch(event.touch_event.index);
+
+						touch->x = event.touch_event.x / width;
+
+						touch->y = 1 - event.touch_event.y / height;
 
 						touch->down = true;
 
@@ -136,7 +144,15 @@ int main()
 					}
 					case WINDOW_EVENT_TOUCH_UP:
 					{
+						double width = window_get_width(window);
+
+						double height = window_get_height(window);
+
 						Touch* touch = input_get_touch(event.touch_event.index);
+
+						touch->x = event.touch_event.x / width;
+
+						touch->y = 1 - event.touch_event.y / height;
 
 						touch->down = false;
 
