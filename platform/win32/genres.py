@@ -1,7 +1,8 @@
 import os
+import sys
 
-asset_dir = "assets"
-output_dir = "generated"
+asset_dir = sys.argv[1]
+output_dir = sys.argv[2]
 
 rc_file = os.path.join(output_dir, "resources.rc")
 header_file = os.path.join(output_dir, "resources.h")

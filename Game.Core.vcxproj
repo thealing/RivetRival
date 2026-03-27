@@ -78,9 +78,6 @@
     <ClCompile Include="source\game\util.c" />
     <ClCompile Include="source\game\wheels.c" />
   </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="generated\resources.rc" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -140,22 +137,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)build\bin\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)build\temp\$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)build\temp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)build\bin\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)build\temp\$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)build\temp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)build\bin\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)build\temp\$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)build\temp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)build\bin\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)build\temp\$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)build\temp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -164,7 +161,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <DisableSpecificWarnings>4024;4047;4057;4133;4200;4201;4244;</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>source;generated</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>source</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -185,7 +182,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <DisableSpecificWarnings>4024;4047;4057;4133;4200;4201;4244;</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>source;generated</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>source</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -207,7 +204,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <DisableSpecificWarnings>4024;4047;4057;4133;4200;4201;4244;</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>source;generated</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>source</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -228,7 +225,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <DisableSpecificWarnings>4024;4047;4057;4133;4200;4201;4244;</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>source;generated</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>source</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>

@@ -1,4 +1,4 @@
-#include "resources.h"
+#include "generated/resources.h"
 
 #include "platform.h"
 

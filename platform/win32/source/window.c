@@ -2,7 +2,7 @@
 
 #include "platform.h"
 
-void extract_assets(const char* folder_name);
+#include "resources.h"
 
 static Window_Event_Node* s_event_first;
 
