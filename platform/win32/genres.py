@@ -14,12 +14,13 @@ assets = []
 for root, dirs, files in os.walk(asset_dir):
 	for file in files:
 		full_path = os.path.join(root, file)
-		rel_path = os.path.relpath(full_path, asset_dir).replace(os.sep, "\\\\")
-		assets.append((rel_path, full_path.replace(os.sep, "/")))
+		rel_path = os.path.relpath(full_path, asset_dir).replace(os.sep, "/")
+		rc_path = os.path.relpath(full_path, output_dir).replace(os.sep, "/")
+		assets.append((rel_path, rc_path))
 
 with open(rc_file, "w") as rc:
-	for i, (rel_path, full_path) in enumerate(assets):
-		rc.write(f'{i + 1} RCDATA "{full_path}"\n')
+	for i, (rel_path, rc_path) in enumerate(assets):
+		rc.write(f'{i + 1} RCDATA "{rc_path}"\n')
 
 with open(header_file, "w") as h:
 	h.write(f"#define ASSET_COUNT {len(assets)}\n\n")
