@@ -228,15 +228,25 @@
     <Content Include="assets\sounds\music.mp3" />
     <Content Include="assets\sounds\saw.mp3" />
     <Content Include="assets\sounds\water.mp3" />
-    <Content Include="platform\android\res\values\strings.xml" />
-    <AntBuildXml Include="platform\android\build.xml" />
-    <AndroidManifest Include="platform\android\AndroidManifest.xml" />
-    <AntProjectPropertiesFile Include="platform\android\project.properties" />
-    <Content Include="platform\android\res\values\styles.xml" />
+    <Content Include="platform\android\res\values\strings.xml">
+      <Link>res\values\strings.xml</Link>
+    </Content>
+    <AntBuildXml Include="platform\android\build.xml">
+      <Link>build.xml</Link>
+    </AntBuildXml>
+    <AndroidManifest Include="platform\android\AndroidManifest.xml">
+      <Link>AndroidManifest.xml</Link>
+    </AndroidManifest>
+    <AntProjectPropertiesFile Include="platform\android\project.properties">
+      <Link>project.properties</Link>
+    </AntProjectPropertiesFile>
+    <Content Include="platform\android\res\values\styles.xml">
+      <Link>res\values\styles.xml</Link>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Game.NativeActivity.vcxproj">
-      <Project>{66d53c1e-38ec-4e29-9dba-19eaa9c187f4}</Project>
+      <Project>{2c5e86f3-4995-4cc2-922b-31fade1ed91c}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(AndroidTargetsPath)\Android.targets" />
