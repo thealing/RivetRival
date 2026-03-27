@@ -327,8 +327,6 @@ void graphics_draw_segment(const Segment* segment, bool fill)
 
 	glVertexPointer(2, GL_FLOAT, 0, vertices);
 
-	glTexCoordPointer(2, GL_FLOAT, 0, NULL);
-
 	glDrawArrays(GL_LINES, 0, 2);
 }
 
@@ -351,8 +349,6 @@ void graphics_draw_circle(const Circle* circle, bool fill)
 
 	glVertexPointer(2, GL_FLOAT, 0, vertices);
 
-	glTexCoordPointer(2, GL_FLOAT, 0, NULL);
-
 	glDrawArrays(fill ? GL_TRIANGLE_FAN : GL_LINE_STRIP, 0, GRAPHICS_CIRCLE_RESOLUTION + 2);
 }
 
@@ -368,8 +364,6 @@ void graphics_draw_polygon(const Polygon* polygon, bool fill)
 	}
 
 	glVertexPointer(2, GL_FLOAT, 0, vertices);
-
-	glTexCoordPointer(2, GL_FLOAT, 0, NULL);
 
 	glDrawArrays(fill ? GL_TRIANGLE_FAN : GL_LINE_LOOP, 0, polygon->point_count);
 }
