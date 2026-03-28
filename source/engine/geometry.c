@@ -572,16 +572,19 @@ void shape_transform(const Shape* shape, Transform transform, Shape* result)
 		case SHAPE_TYPE_SEGMENT:
 		{
 			segment_transform(&shape->segment, transform, &result->segment);
+
 			return;
 		}
 		case SHAPE_TYPE_CIRCLE:
 		{
 			circle_transform(&shape->circle, transform, &result->circle);
+
 			return;
 		}
 		case SHAPE_TYPE_POLYGON:
 		{
 			polygon_transform(&shape->polygon, transform, &result->polygon);
+
 			return;
 		}
 	}
