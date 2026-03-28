@@ -84,6 +84,21 @@ LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 	switch (msg)
 	{
+		case WM_ACTIVATE:
+		{
+			if (LOWORD(wparam) == WA_INACTIVE)
+			{
+				event.type = WINDOW_EVENT_PAUSED;
+			}
+			else
+			{
+				event.type = WINDOW_EVENT_RESUMED;
+			}
+
+			push_event(&event);
+
+			break;
+		}
 		case WM_SIZE:
 		{
 			glViewport(0, 0, LOWORD(lparam), HIWORD(lparam));
