@@ -1,5 +1,5 @@
 # Rivet Rival
-A [Drive Ahead](https://play.google.com/store/apps/details?id=com.dodreams.driveahead&hl=en) clone game written using my game framework ([for windows](https://github.com/thealing/WindowsGameFramework) and [for android](https://github.com/thealing/AndroidGameFramework)).
+A cross-platform [Drive Ahead](https://play.google.com/store/apps/details?id=com.dodreams.driveahead&hl=en) clone game built from scratch.
 ## Keybindings
 - Enter - start, restart
 - Space - pause, resume
