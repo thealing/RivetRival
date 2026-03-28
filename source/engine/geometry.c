@@ -634,13 +634,13 @@ Vector shape_project_point(const Shape* shape, Vector point)
 	UNREACHABLE();
 }
 
-Vector project_onto_line(Vector a, Vector b, Vector p)
+Vector project_onto_line(Vector a, Vector b, Vector p, double* t)
 {
 	Vector ab = vector_subtract(b, a);
 
-	double t = vector_dot(ab, vector_subtract(p, a)) / vector_length_squared(ab);
+	*t = vector_dot(ab, vector_subtract(p, a)) / vector_length_squared(ab);
 
-	return vector_add(a, vector_multiply(ab, t));
+	return vector_add(a, vector_multiply(ab, *t));
 }
 
 Vector project_onto_segment(Vector a, Vector b, Vector p)
@@ -880,11 +880,9 @@ bool collide_segment_polygon(const Segment* segment, const Polygon* polygon, Col
 
 bool collide_circle_polygon(const Circle* circle, const Polygon* polygon, Collision* collision)
 {
-	bool outside = false; 
+	collision->depth = INFINITY;
 
-	double min_distance = INFINITY;
-
-	Vector closest_point = vector_create(0, 0);
+	bool outside = false;
 
 	for (int i = polygon->point_count - 1, j = 0; j < polygon->point_count; i = j, j++)
 	{
@@ -894,47 +892,61 @@ bool collide_circle_polygon(const Circle* circle, const Polygon* polygon, Collis
 
 		Vector side = vector_subtract(b, a);
 
-		Vector axis = vector_left(side);
+		Vector axis = vector_normalize(vector_left(side));
 
-		if (vector_dot(circle->center, axis) < vector_dot(a, axis))
+		double t = 0;
+
+		Vector point = project_onto_line(a, b, circle->center, &t);
+
+		double distance = circle->radius + vector_dot(circle->center, axis) - vector_dot(point, axis);
+
+		if (distance < collision->depth)
 		{
-			outside = true;
-		}
+			if (distance < 0)
+			{
+				return false;
+			}
 
-		Vector point = project_onto_segment(a, b, circle->center);
+			collision->depth = distance;
 
-		double distance = vector_distance_squared(point, circle->center);
+			collision->point = point;
 
-		if (distance < min_distance)
-		{
-			min_distance = distance;
+			collision->normal = axis;
 
-			closest_point = point;
+			outside = t < 0 || t > 1;
 		}
 	}
-
-	min_distance = sqrt(min_distance);
 
 	if (outside)
 	{
-		if (min_distance > circle->radius)
+		collision->depth = -INFINITY;
+
+		for (int i = polygon->point_count - 1, j = 0; j < polygon->point_count; i = j, j++)
+		{
+			Vector a = polygon->points[i];
+
+			Vector b = polygon->points[j];
+
+			Vector point = project_onto_segment(a, b, circle->center);
+
+			Vector axis = vector_normalize(vector_subtract(point, circle->center));
+
+			double depth = circle->radius + vector_dot(circle->center, axis) - vector_dot(point, axis);
+
+			if (depth > collision->depth)
+			{
+				collision->depth = depth;
+
+				collision->point = point;
+
+				collision->normal = axis;
+			}
+		}
+
+		if (collision->depth < 0)
 		{
 			return false;
 		}
-
-		collision->point = closest_point;
-
-		collision->normal = vector_normalize(vector_subtract(closest_point, circle->center));
-
-		collision->depth = circle->radius - min_distance;
-	}
-	else
-	{
-		collision->point = closest_point;
-
-		collision->normal = vector_normalize(vector_subtract(circle->center, closest_point));
-
-		collision->depth = circle->radius + min_distance;
 	}
 
 	return true;

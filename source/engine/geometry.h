@@ -234,7 +234,7 @@ bool shape_test_point(const Shape* shape, Vector point);
 
 Vector shape_project_point(const Shape* shape, Vector point);
 
-Vector project_onto_line(Vector a, Vector b, Vector p);
+Vector project_onto_line(Vector a, Vector b, Vector p, double* t);
 
 Vector project_onto_segment(Vector a, Vector b, Vector p);
 
