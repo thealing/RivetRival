@@ -204,6 +204,11 @@ void physics_world_step(Physics_World* world, double delta_time)
 
 		double normal_velocity = vector_dot(collision.normal, relative_velocity);
 
+		if (normal_velocity >= 0)
+		{
+			continue;
+		}
+
 		double combined_restitution = fmax(collider_1->restitution, collider_2->restitution);
 
 		double rebound_velocity = -fmin(normal_velocity, 0) * combined_restitution;
@@ -211,11 +216,6 @@ void physics_world_step(Physics_World* world, double delta_time)
 		double correction_velocity = collision.depth / delta_time * PHYSICS_CORRECTION_VELOCITY_FACTOR;
 
 		double target_velocity = fmax(rebound_velocity, correction_velocity);
-
-		if (normal_velocity >= target_velocity)
-		{
-			//continue;
-		}
 
 		double normal_inverse_mass_1 = body_1->inverse_linear_mass + body_1->inverse_angular_mass * square(vector_dot(collision.normal, tangent_1));
 
