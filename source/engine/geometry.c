@@ -898,16 +898,16 @@ bool collide_circle_polygon(const Circle* circle, const Polygon* polygon, Collis
 
 		Vector point = project_onto_line(a, b, circle->center, &t);
 
-		double distance = circle->radius + vector_dot(circle->center, axis) - vector_dot(point, axis);
+		double depth = circle->radius + vector_dot(circle->center, axis) - vector_dot(point, axis);
 
-		if (distance < collision->depth)
+		if (depth < collision->depth)
 		{
-			if (distance < 0)
+			if (depth < 0)
 			{
 				return false;
 			}
 
-			collision->depth = distance;
+			collision->depth = depth;
 
 			collision->point = point;
 
