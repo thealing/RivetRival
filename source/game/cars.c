@@ -91,7 +91,7 @@ static void create_head(Car* car, int index, Physics_World* world, Vector positi
 
 	Shape* shape = shape_create_circle(vector_create(0, 0), 10);
 
-	Physics_Collider* collider = physics_collider_create(body, move_shape(shape), 0.75);
+	Physics_Collider* collider = physics_collider_create(body, move_shape(shape), 3.75);
 
 	collider->static_friction = 1;
 
@@ -253,7 +253,7 @@ Car* car_create(Car_Type type, Physics_World* world, Vector position, int group)
 
 			for (int i = 2, j = 0; i <= 5; i++, j++)
 			{
-				create_extra_body(car, i, world, position, 0, vector_create(-38, -1 + 10 * j), 0.5, 2, s_plank, COUNTOF(s_plank), COUNTOF(s_plank[0]), FLAG_OBJECT);
+				create_extra_body(car, i, world, position, 0, vector_create(-38, -1 + 10 * j), 5, 2, s_plank, COUNTOF(s_plank), COUNTOF(s_plank[0]), FLAG_OBJECT);
 
 				car->textures[i] = g_textures.plank;
 			}

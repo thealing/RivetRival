@@ -6,7 +6,7 @@
 
 #define PHYSICS_COLLISION_COUNT_MAX 100000
 
-#define PHYSICS_CORRECTION_VELOCITY_GAIN 0.1
+#define PHYSICS_CORRECTION_VELOCITY_FACTOR 0.4
 
 typedef enum Physics_Body_Type Physics_Body_Type;
 
@@ -82,10 +82,6 @@ struct Physics_Body
 	Vector linear_force;
 
 	double angular_force;
-
-	Vector correction_linear_velocity;
-
-	double correction_angular_velocity;
 
 	bool world_transform_is_dirty;
 
@@ -200,8 +196,6 @@ void physics_body_apply_impulse_at_world_point(Physics_Body* body, Vector world_
 void physics_body_apply_force_at_local_point(Physics_Body* body, Vector local_point, Vector force);
 
 void physics_body_apply_force_at_world_point(Physics_Body* body, Vector world_point, Vector force);
-
-void physics_body_apply_correction_impulse(Physics_Body* body, Vector point, Vector impulse);
 
 void physics_body_update_world_transform(Physics_Body* body);
 

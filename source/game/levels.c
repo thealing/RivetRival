@@ -706,7 +706,7 @@ void level_add_random_objects(Level* level)
 				}
 				case OBJECT_TYPE_LIFTER:
 				{
-					add_object(level, object_create_lifter(level->body->world, vector_add_xy(level->random_locations[i].position, 0, -30)));
+					add_object(level, object_create_lifter(level->body->world, vector_add_xy(level->random_locations[i].position, 0, 0)));
 
 					break;
 				}

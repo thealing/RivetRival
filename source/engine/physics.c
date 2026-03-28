@@ -88,10 +88,6 @@ void physics_world_step(Physics_World* world, double delta_time)
 		body->linear_force = vector_create(0.0, 0.0);
 		
 		body->angular_force = 0.0;
-		
-		body->correction_linear_velocity = vector_create(0.0, 0.0);
-
-		body->correction_angular_velocity = 0.0;
 	}
 
 	for (List_Node* collider_node = world->collider_list.first; collider_node != NULL; )
@@ -208,18 +204,24 @@ void physics_world_step(Physics_World* world, double delta_time)
 
 		double normal_velocity = vector_dot(collision.normal, relative_velocity);
 
-		if (normal_velocity >= 0.0)
-		{
-			continue;
-		}
-
 		double combined_restitution = fmax(collider_1->restitution, collider_2->restitution);
+
+		double rebound_velocity = -fmin(normal_velocity, 0) * combined_restitution;
+
+		double correction_velocity = collision.depth / delta_time * PHYSICS_CORRECTION_VELOCITY_FACTOR;
+
+		double target_velocity = fmax(rebound_velocity, correction_velocity);
+
+		if (normal_velocity >= target_velocity)
+		{
+			//continue;
+		}
 
 		double normal_inverse_mass_1 = body_1->inverse_linear_mass + body_1->inverse_angular_mass * square(vector_dot(collision.normal, tangent_1));
 
 		double normal_inverse_mass_2 = body_2->inverse_linear_mass + body_2->inverse_angular_mass * square(vector_dot(collision.normal, tangent_2));
 
-		double collision_impulse = -normal_velocity * (1 + combined_restitution) / (normal_inverse_mass_1 + normal_inverse_mass_2);
+		double collision_impulse = (target_velocity - normal_velocity) / (normal_inverse_mass_1 + normal_inverse_mass_2);
 
 		body_1->linear_velocity = vector_subtract(body_1->linear_velocity, vector_multiply(collision.normal, collision_impulse * body_1->inverse_linear_mass));
 
@@ -245,7 +247,9 @@ void physics_world_step(Physics_World* world, double delta_time)
 
 		if (fabs(friction_impulse) > fabs(collision_impulse) * combined_static_friction)
 		{
-			friction_impulse = signum(friction_impulse) * fabs(collision_impulse) * combined_dynamic_friction;
+			double max_impulse_magnitude = fabs(collision_impulse) * combined_dynamic_friction;
+
+			friction_impulse = clamp(friction_impulse, -max_impulse_magnitude, max_impulse_magnitude);
 		}
 
 		body_1->linear_velocity = vector_subtract(body_1->linear_velocity, vector_multiply(collision_tangent, friction_impulse * body_1->inverse_linear_mass));
@@ -255,48 +259,6 @@ void physics_world_step(Physics_World* world, double delta_time)
 		body_1->angular_velocity -= vector_dot(collision_tangent, tangent_1) * friction_impulse * body_1->inverse_angular_mass;
 
 		body_2->angular_velocity += vector_dot(collision_tangent, tangent_2) * friction_impulse * body_2->inverse_angular_mass;
-	}
-
-	for (int i = 0; i < collision_count; i++)
-	{
-		Collision collision = collisions[i].collision;
-
-		Physics_Collider* collider_1 = collisions[i].collider_1;
-
-		Physics_Collider* collider_2 = collisions[i].collider_2;
-
-		Physics_Body* body_1 = collider_1->body;
-
-		Physics_Body* body_2 = collider_2->body;
-
-		Vector tangent_1 = vector_left(vector_subtract(collision.point, body_1->position));
-
-		Vector tangent_2 = vector_left(vector_subtract(collision.point, body_2->position));
-
-		Vector contact_velocity_1 = vector_add(body_1->linear_velocity, vector_multiply(tangent_1, body_1->angular_velocity));
-
-		Vector contact_velocity_2 = vector_add(body_2->linear_velocity, vector_multiply(tangent_2, body_2->angular_velocity));
-
-		Vector relative_velocity = vector_subtract(contact_velocity_2, contact_velocity_1);
-
-		double normal_velocity = vector_dot(collision.normal, relative_velocity);
-
-		double correction_impulse = collision.depth / delta_time - normal_velocity;
-
-		if (correction_impulse <= 0.0)
-		{
-			continue;
-		}
-
-		double inverse_mass_1 = body_1->inverse_linear_mass + body_1->inverse_angular_mass * square(vector_dot(collision.normal, tangent_1));
-
-		double inverse_mass_2 = body_2->inverse_linear_mass + body_2->inverse_angular_mass * square(vector_dot(collision.normal, tangent_2));
-
-		correction_impulse /= inverse_mass_1 + inverse_mass_2;
-
-		physics_body_apply_correction_impulse(body_1, collision.point, vector_multiply(collision.normal, -correction_impulse));
-
-		physics_body_apply_correction_impulse(body_2, collision.point, vector_multiply(collision.normal, correction_impulse));
 	}
 
 	free(collisions);
@@ -321,25 +283,29 @@ void physics_world_step(Physics_World* world, double delta_time)
 
 					Vector tangent_2 = vector_left(vector_subtract(joint->world_anchor_2, joint->body_2->position));
 
-					Vector velocity_1 = vector_add(joint->body_1->linear_velocity, vector_multiply(tangent_1, joint->body_1->angular_velocity));
-
-					Vector velocity_2 = vector_add(joint->body_2->linear_velocity, vector_multiply(tangent_2, joint->body_2->angular_velocity));
-
-					Vector relative_velocity = vector_subtract(velocity_2, velocity_1);
-
-					double normal_velocity = vector_dot(normal, relative_velocity);
-
-					double correction_impulse = distance / delta_time - normal_velocity;
-
 					double inverse_mass_1 = joint->body_1->inverse_linear_mass + joint->body_1->inverse_angular_mass * square(vector_dot(normal, tangent_1));
 
 					double inverse_mass_2 = joint->body_2->inverse_linear_mass + joint->body_2->inverse_angular_mass * square(vector_dot(normal, tangent_2));
 
-					correction_impulse /= inverse_mass_1 + inverse_mass_2;
+					Vector lever_1 = vector_subtract(joint->world_anchor_1, joint->body_1->position);
 
-					physics_body_apply_correction_impulse(joint->body_1, joint->world_anchor_1, vector_multiply(normal, correction_impulse));
+					Vector lever_2 = vector_subtract(joint->world_anchor_2, joint->body_2->position);
 
-					physics_body_apply_correction_impulse(joint->body_2, joint->world_anchor_2, vector_multiply(normal, -correction_impulse));
+					double normal_velocity_1 = vector_dot(joint->body_1->linear_velocity, normal) + vector_cross(lever_1, normal) * joint->body_1->angular_velocity;
+
+					double normal_velocity_2 = vector_dot(joint->body_2->linear_velocity, normal) + vector_cross(lever_2, normal) * joint->body_2->angular_velocity;
+
+					double normal_velocity = normal_velocity_2 - normal_velocity_1;
+
+					double correction_impulse = (distance / delta_time * PHYSICS_CORRECTION_VELOCITY_FACTOR + normal_velocity) / (inverse_mass_1 + inverse_mass_2);
+
+					joint->body_1->linear_velocity = vector_add(joint->body_1->linear_velocity, vector_multiply(normal, correction_impulse * joint->body_1->inverse_linear_mass));
+
+					joint->body_2->linear_velocity = vector_subtract(joint->body_2->linear_velocity, vector_multiply(normal, correction_impulse * joint->body_2->inverse_linear_mass));
+
+					joint->body_1->angular_velocity += vector_dot(normal, tangent_1) * correction_impulse * joint->body_1->inverse_angular_mass;
+
+					joint->body_2->angular_velocity -= vector_dot(normal, tangent_2) * correction_impulse * joint->body_2->inverse_angular_mass;
 				}
 
 				double relative_angle = joint->body_2->angle - joint->body_1->angle;
@@ -348,13 +314,11 @@ void physics_world_step(Physics_World* world, double delta_time)
 				{
 					double relative_angular_velocity = joint->body_2->angular_velocity - joint->body_1->angular_velocity;
 
-					double correction_angular_impulse = relative_angle / delta_time - relative_angular_velocity;
+					double correction_angular_impulse = (relative_angle / delta_time * PHYSICS_CORRECTION_VELOCITY_FACTOR + relative_angular_velocity) / (joint->body_1->inverse_angular_mass + joint->body_2->inverse_angular_mass);
 
-					double combined_inverse_angular_mass = joint->body_1->inverse_angular_mass + joint->body_2->inverse_angular_mass;
-
-					joint->body_1->correction_angular_velocity += correction_angular_impulse * joint->body_1->inverse_angular_mass / combined_inverse_angular_mass;
+					joint->body_1->angular_velocity += correction_angular_impulse * joint->body_1->inverse_angular_mass;
 					
-					joint->body_2->correction_angular_velocity -= correction_angular_impulse * joint->body_2->inverse_angular_mass / combined_inverse_angular_mass;
+					joint->body_2->angular_velocity -= correction_angular_impulse * joint->body_2->inverse_angular_mass;
 				}
 
 				break;
@@ -370,28 +334,32 @@ void physics_world_step(Physics_World* world, double delta_time)
 				if (distance != 0.0)
 				{
 					Vector tangent_1 = vector_left(vector_subtract(joint->world_anchor_1, joint->body_1->position));
-				
+
 					Vector tangent_2 = vector_left(vector_subtract(joint->world_anchor_2, joint->body_2->position));
 
-					Vector velocity_1 = vector_add(joint->body_1->linear_velocity, vector_multiply(tangent_1, joint->body_1->angular_velocity));
-					
-					Vector velocity_2 = vector_add(joint->body_2->linear_velocity, vector_multiply(tangent_2, joint->body_2->angular_velocity));
-
-					Vector relative_velocity = vector_subtract(velocity_2, velocity_1);
-
-					double normal_velocity = vector_dot(normal, relative_velocity);
-
-					double correction_impulse = distance / delta_time - normal_velocity;
-
 					double inverse_mass_1 = joint->body_1->inverse_linear_mass + joint->body_1->inverse_angular_mass * square(vector_dot(normal, tangent_1));
-					
-					double inverse_mass_2 = joint->body_2->inverse_linear_mass + joint->body_2->inverse_angular_mass * square(vector_dot(normal, tangent_2));
-					
-					correction_impulse /= inverse_mass_1 + inverse_mass_2;
 
-					physics_body_apply_correction_impulse(joint->body_1, joint->world_anchor_1, vector_multiply(normal, correction_impulse));
-					
-					physics_body_apply_correction_impulse(joint->body_2, joint->world_anchor_2, vector_multiply(normal, -correction_impulse));
+					double inverse_mass_2 = joint->body_2->inverse_linear_mass + joint->body_2->inverse_angular_mass * square(vector_dot(normal, tangent_2));
+
+					Vector lever_1 = vector_subtract(joint->world_anchor_1, joint->body_1->position);
+
+					Vector lever_2 = vector_subtract(joint->world_anchor_2, joint->body_2->position);
+
+					double normal_velocity_1 = vector_dot(joint->body_1->linear_velocity, normal) + vector_cross(lever_1, normal) * joint->body_1->angular_velocity;
+
+					double normal_velocity_2 = vector_dot(joint->body_2->linear_velocity, normal) + vector_cross(lever_2, normal) * joint->body_2->angular_velocity;
+
+					double normal_velocity = normal_velocity_2 - normal_velocity_1;
+
+					double correction_impulse = (distance / delta_time * PHYSICS_CORRECTION_VELOCITY_FACTOR + normal_velocity) / (inverse_mass_1 + inverse_mass_2);
+
+					joint->body_1->linear_velocity = vector_add(joint->body_1->linear_velocity, vector_multiply(normal, correction_impulse * joint->body_1->inverse_linear_mass));
+
+					joint->body_2->linear_velocity = vector_subtract(joint->body_2->linear_velocity, vector_multiply(normal, correction_impulse * joint->body_2->inverse_linear_mass));
+
+					joint->body_1->angular_velocity += vector_dot(normal, tangent_1) * correction_impulse * joint->body_1->inverse_angular_mass;
+
+					joint->body_2->angular_velocity -= vector_dot(normal, tangent_2) * correction_impulse * joint->body_2->inverse_angular_mass;
 				}
 
 				break;
@@ -403,18 +371,14 @@ void physics_world_step(Physics_World* world, double delta_time)
 	{
 		Physics_Body* body = body_node->item;
 
-		Vector position_change = vector_multiply(vector_add(body->linear_velocity, body->correction_linear_velocity), delta_time);
+		Vector position_change = vector_multiply(body->linear_velocity, delta_time);
 
-		double angle_change = (body->angular_velocity + body->correction_angular_velocity) * delta_time;
+		double angle_change = body->angular_velocity * delta_time;
 		
 		body->position = vector_add(body->position, position_change);
 
 		body->angle += angle_change;
 		
-		body->linear_velocity = vector_add(body->linear_velocity, vector_multiply(body->correction_linear_velocity, PHYSICS_CORRECTION_VELOCITY_GAIN));
-		
-		body->angular_velocity += body->correction_angular_velocity * PHYSICS_CORRECTION_VELOCITY_GAIN;
-
 		body->world_transform_is_dirty |= position_change.x != 0.0;
 
 		body->world_transform_is_dirty |= position_change.y != 0.0;
@@ -523,13 +487,6 @@ void physics_body_apply_force_at_world_point(Physics_Body* body, Vector world_po
 	body->linear_force = vector_add(body->linear_force, force);
 
 	body->angular_force += vector_cross(vector_subtract(world_point, body->position), force);
-}
-
-void physics_body_apply_correction_impulse(Physics_Body* body, Vector point, Vector impulse)
-{
-	body->correction_linear_velocity = vector_add(body->correction_linear_velocity, vector_multiply(impulse, body->inverse_linear_mass));
-
-	body->correction_angular_velocity += vector_cross(vector_subtract(point, body->position), impulse) * body->inverse_angular_mass;
 }
 
 void physics_body_update_world_transform(Physics_Body* body)
