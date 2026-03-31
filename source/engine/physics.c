@@ -172,9 +172,24 @@ void physics_world_step(Physics_World* world, double delta_time)
 					collided &= collider_2->collision_callback(collider_2, collider_1);
 				}
 
-				if (collided && !collider_1->sensor && !collider_2->sensor)
+				if (collided && !collider_1->sensor && !collider_2->sensor && collision_count + 2 <= collision_count_limit)
 				{
 					collision_count++;
+
+					Collision collision = collisions[collision_count - 1].collision;
+
+					if (collision.depth_2 != 0)
+					{
+						collision.point = collision.point_2;
+
+						collision.depth = collision.depth_2;
+
+						collisions[collision_count] = collisions[collision_count - 1];
+
+						collisions[collision_count].collision = collision;
+
+						collision_count++;
+					}
 				}
 			}
 		}

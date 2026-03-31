@@ -106,6 +106,10 @@ struct Collision
 	Vector normal;
 
 	double depth;
+
+	Vector point_2;
+
+	double depth_2;
 };
 
 Vector vector_create(double x, double y);
@@ -237,6 +241,8 @@ Vector shape_project_point(const Shape* shape, Vector point);
 Vector project_onto_line(Vector a, Vector b, Vector p, double* t);
 
 Vector project_onto_segment(Vector a, Vector b, Vector p);
+
+Vector clamp_onto_segment(Vector a, Vector b, Vector p);
 
 bool test_point_rect(Vector point, const Rect* rect);
 

@@ -377,7 +377,7 @@ Vector polygon_project_point(const Polygon* polygon, Vector point)
 		Vector a = polygon->points[i];
 
 		Vector b = polygon->points[j];
-	
+
 		Vector projected_point = project_onto_segment(a, b, point);
 
 		double distance = vector_distance_squared(projected_point, point);
@@ -428,7 +428,7 @@ Shape* shape_create_polygon(int point_count, const Vector points[])
 	shape->polygon.point_count = point_count;
 
 	memcpy(shape->polygon.points, points, sizeof(Vector) * point_count);
-	
+
 	if (polygon_get_linear_mass_factor(&shape->polygon) < 0)
 	{
 		for (int i = 0; i < point_count; i++)
@@ -662,6 +662,25 @@ Vector project_onto_segment(Vector a, Vector b, Vector p)
 	return vector_add(a, vector_multiply(ab, t));
 }
 
+Vector clamp_onto_segment(Vector a, Vector b, Vector p)
+{
+	Vector ab = vector_subtract(b, a);
+
+	double t = vector_dot(ab, vector_subtract(p, a)) / vector_length_squared(ab);
+
+	if (t < 0.0)
+	{
+		return vector_subtract(p, vector_multiply(ab, t));
+	}
+
+	if (t > 1.0)
+	{
+		return vector_subtract(p, vector_multiply(ab, t - 1.0));
+	}
+
+	return p;
+}
+
 bool test_point_rect(Vector point, const Rect* rect)
 {
 	return point.x >= rect->min.x && point.y >= rect->min.y && point.x <= rect->max.x && point.y <= rect->max.y;
@@ -748,99 +767,92 @@ bool collide_polygons(const Polygon* polygon_1, const Polygon* polygon_2, Collis
 {
 	collision->depth = INFINITY;
 
-	for (int i = polygon_1->point_count - 1, j = 0; j < polygon_1->point_count; i = j, j++)
+	Vector point_2 = vector_create(0, 0);
+
+	double depth_2 = 0;
+
+	for (int t = 0; t < 2; t++)
 	{
-		Vector a = polygon_1->points[i];
-
-		Vector b = polygon_1->points[j];
-
-		Vector side = vector_subtract(b, a);
-
-		Vector axis = vector_normalize(vector_right(side));
-
-		double depth_max = -INFINITY;
-
-		Vector deepest_point = vector_create(0, 0);
-
-		for (int k = 0; k < polygon_2->point_count; k++)
+		for (int i = polygon_1->point_count - 1, j = 0; j < polygon_1->point_count; i = j, j++)
 		{
-			Vector point = polygon_2->points[k];
+			Vector a = polygon_1->points[i];
 
-			double depth = vector_dot(a, axis) - vector_dot(point, axis);
+			Vector b = polygon_1->points[j];
 
-			if (depth > depth_max)
+			Vector axis = vector_normalize(vector_right(vector_subtract(b, a)));
+
+			double offset = vector_dot(a, axis);
+
+			double depth_max = -INFINITY;
+
+			double depth_max_2 = -INFINITY;
+
+			Vector deepest_point = vector_create(0, 0);
+
+			Vector deepest_point_2 = vector_create(0, 0);
+
+			for (int k = 0; k < polygon_2->point_count; k++)
 			{
-				depth_max = depth;
+				Vector point = polygon_2->points[k];
 
-				deepest_point = point;
+				double depth = offset - vector_dot(point, axis);
+
+				if (depth > depth_max)
+				{
+					depth_max_2 = depth_max;
+
+					deepest_point_2 = deepest_point;
+
+					depth_max = depth;
+
+					deepest_point = point;
+				}
+				else if (depth > depth_max_2)
+				{
+					depth_max_2 = depth;
+
+					deepest_point_2 = point;
+				}
 			}
-			else if (depth == depth_max)
+
+			if (depth_max < 0.0)
 			{
-				deepest_point = vector_middle(deepest_point, point);
+				return false;
+			}
+
+			if (depth_max < collision->depth)
+			{
+				collision->depth = depth_max;
+
+				collision->point = deepest_point;
+
+				collision->normal = axis;
+
+				if (depth_max_2 < 0.0)
+				{
+					depth_2 = 0;
+				}
+				else
+				{
+					point_2 = clamp_onto_segment(a, b, deepest_point_2);
+
+					depth_2 = depth_max_2;
+				}
 			}
 		}
 
-		if (depth_max < 0.0)
-		{
-			return false;
-		}
+		const Polygon* polygon = polygon_1;
 
-		if (depth_max < collision->depth)
-		{
-			collision->point = deepest_point;
+		polygon_1 = polygon_2;
 
-			collision->normal = axis;
+		polygon_2 = polygon;
 
-			collision->depth = depth_max;
-		}
+		collision->normal = vector_negate(collision->normal);
 	}
 
-	for (int i = polygon_2->point_count - 1, j = 0; j < polygon_2->point_count; i = j, j++)
-	{
-		Vector a = polygon_2->points[i];
+	collision->point_2 = point_2;
 
-		Vector b = polygon_2->points[j];
-
-		Vector side = vector_subtract(b, a);
-
-		Vector axis = vector_normalize(vector_left(side));
-
-		double depth_max = -INFINITY;
-
-		Vector deepest_point = vector_create(0, 0);
-
-		for (int k = 0; k < polygon_1->point_count; k++)
-		{
-			Vector point = polygon_1->points[k];
-
-			double depth = vector_dot(point, axis) - vector_dot(a, axis);
-
-			if (depth > depth_max)
-			{
-				depth_max = depth;
-
-				deepest_point = point;
-			}
-			else if (depth == depth_max)
-			{
-				deepest_point = vector_middle(deepest_point, point);
-			}
-		}
-
-		if (depth_max < 0.0)
-		{
-			return false;
-		}
-
-		if (depth_max < collision->depth)
-		{
-			collision->point = deepest_point;
-
-			collision->normal = axis;
-
-			collision->depth = depth_max;
-		}
-	}
+	collision->depth_2 = depth_2;
 
 	return true;
 }
