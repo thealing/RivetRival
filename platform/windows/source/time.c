@@ -17,11 +17,23 @@ double get_time()
 
 void sleep(double duration)
 {
-	static HANDLE timer;
+	typedef NTSTATUS (NTAPI* NtSetTimerResolution)(ULONG DesiredResolution, BOOLEAN SetResolution, PULONG CurrentResolution);
 
-	if (timer == NULL)
+	typedef NTSTATUS (NTAPI* NtDelayExecution)(BOOLEAN Alertable, PLARGE_INTEGER DelayInterval);
+
+	static NtDelayExecution ntDelayExecution;
+
+	if (ntDelayExecution == NULL)
 	{
-		timer = CreateWaitableTimer(NULL, TRUE, NULL);
+		HMODULE ntdll = GetModuleHandle("ntdll.dll");
+
+		NtSetTimerResolution ntSetTimerResolution = (NtSetTimerResolution)GetProcAddress(ntdll, "NtSetTimerResolution");
+
+		ULONG currentResolution = 0;
+
+		ntSetTimerResolution(0, TRUE, &currentResolution);
+
+		ntDelayExecution = (NtDelayExecution)GetProcAddress(ntdll, "NtDelayExecution");
 	}
 
 	if (duration <= 0.0)
@@ -29,11 +41,9 @@ void sleep(double duration)
 		return;
 	}
 
-	LARGE_INTEGER due_time;
+	LARGE_INTEGER large_duration = { 0 };
 
-	due_time.QuadPart = -10000000 * duration;
+	large_duration.QuadPart = -10000000 * duration;
 
-	SetWaitableTimer(timer, &due_time, 0, NULL, NULL, FALSE);
-
-	WaitForSingleObject(timer, INFINITE);
+	ntDelayExecution(FALSE, &large_duration);
 }
