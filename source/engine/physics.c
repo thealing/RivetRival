@@ -260,12 +260,9 @@ void physics_world_step(Physics_World* world, double delta_time)
 
 		double friction_impulse = -tangent_velocity * combined_static_friction / (tangent_inverse_mass_1 + tangent_inverse_mass_2);
 
-		if (fabs(friction_impulse) > fabs(collision_impulse) * combined_static_friction)
-		{
-			double max_impulse_magnitude = fabs(collision_impulse) * combined_dynamic_friction;
+		double max_impulse_magnitude = fabs(collision_impulse) * combined_dynamic_friction;
 
-			friction_impulse = clamp(friction_impulse, -max_impulse_magnitude, max_impulse_magnitude);
-		}
+		friction_impulse = clamp(friction_impulse, -max_impulse_magnitude, max_impulse_magnitude);
 
 		body_1->linear_velocity = vector_subtract(body_1->linear_velocity, vector_multiply(collision_tangent, friction_impulse * body_1->inverse_linear_mass));
 
