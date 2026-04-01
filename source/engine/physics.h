@@ -176,8 +176,6 @@ struct Physics_Collision
 
 	Physics_Collider* collider_2;
 
-	bool second;
-
 	double inverse_normal_mass;
 
 	double inverse_tangent_mass;

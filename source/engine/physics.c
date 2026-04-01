@@ -195,8 +195,6 @@ void physics_world_step(Physics_World* world, double delta_time)
 
 						collisions[collision_count].collision = collision;
 
-						collisions[collision_count].second = true;
-
 						collision_count++;
 					}
 				}
