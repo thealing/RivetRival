@@ -219,6 +219,11 @@ bool window_is_open()
 	return !s_window_closed;
 }
 
+bool window_is_active()
+{
+	return GetActiveWindow() != NULL;
+}
+
 bool window_poll_event(Window_Event* event)
 {
 	MSG msg = { 0 };

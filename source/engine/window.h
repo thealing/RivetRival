@@ -112,6 +112,8 @@ void window_create(int width, int height);
 
 bool window_is_open();
 
+bool window_is_active();
+
 int window_get_width(void* window);
 
 int window_get_height(void* window);

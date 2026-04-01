@@ -14,6 +14,8 @@ static Window_Event_Node* s_event_first;
 
 static Window_Event_Node* s_event_last;
 
+static bool s_window_active;
+
 static void push_event(Window_Event* event)
 {
 	if (s_event_last == NULL) 
@@ -245,6 +247,8 @@ static void on_pause(ANativeActivity* activity)
 
 	push_event(&(Window_Event){ .type = WINDOW_EVENT_PAUSED });
 
+	s_window_active = false;
+
 	pthread_mutex_unlock(&s_mutex);
 }
 
@@ -254,6 +258,8 @@ static void on_resume(ANativeActivity* activity)
 
 	push_event(&(Window_Event){ .type = WINDOW_EVENT_RESUMED });
 
+	s_window_active = true;
+
 	pthread_mutex_unlock(&s_mutex);
 }
 
@@ -262,6 +268,8 @@ static void on_native_window_created(ANativeActivity* activity, ANativeWindow* w
 	pthread_mutex_lock(&s_mutex);
 
 	push_event(&(Window_Event){ .type = WINDOW_EVENT_WINDOW_CREATED, .state_event = { .window = window } });
+
+	s_window_active = true;
 
 	pthread_mutex_unlock(&s_mutex);
 }
@@ -372,6 +380,11 @@ void window_create(int width, int height)
 bool window_is_open()
 {
 	return true;
+}
+
+bool window_is_active()
+{
+	return s_window_active;
 }
 
 int window_get_width(void* window)

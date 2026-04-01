@@ -13,6 +13,13 @@ void input_update()
 	memcpy(s_previous_touches, s_current_touches, sizeof(s_previous_touches));
 
 	memcpy(s_previous_keys, s_current_keys, sizeof(s_previous_keys));
+
+	if (!window_is_active())
+	{
+		memset(s_current_touches, 0, sizeof(s_current_touches));
+
+		memset(s_current_keys, 0, sizeof(s_current_keys));
+	}
 }
 
 Touch* input_get_touch(int index)
