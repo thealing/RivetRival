@@ -147,11 +147,11 @@ Transform transform_invert(Transform transform)
 
 	result.x = -transform.c * transform.x - transform.s * transform.y;
 
-	result.y =  transform.s * transform.x - transform.c * transform.y;
+	result.y = transform.s * transform.x - transform.c * transform.y;
 
 	result.s = -transform.s;
 
-	result.c =  transform.c;
+	result.c = transform.c;
 
 	return result;
 }
@@ -634,15 +634,6 @@ Vector shape_project_point(const Shape* shape, Vector point)
 	UNREACHABLE();
 }
 
-Vector project_onto_line(Vector a, Vector b, Vector p, double* t)
-{
-	Vector ab = vector_subtract(b, a);
-
-	*t = vector_dot(ab, vector_subtract(p, a)) / vector_length_squared(ab);
-
-	return vector_add(a, vector_multiply(ab, *t));
-}
-
 Vector project_onto_segment(Vector a, Vector b, Vector p)
 {
 	Vector ab = vector_subtract(b, a);
@@ -894,8 +885,6 @@ bool collide_circle_polygon(const Circle* circle, const Polygon* polygon, Collis
 {
 	collision->depth = INFINITY;
 
-	bool outside = false;
-
 	for (int i = polygon->point_count - 1, j = 0; j < polygon->point_count; i = j, j++)
 	{
 		Vector a = polygon->points[i];
@@ -906,11 +895,7 @@ bool collide_circle_polygon(const Circle* circle, const Polygon* polygon, Collis
 
 		Vector axis = vector_normalize(vector_left(side));
 
-		double t = 0;
-
-		Vector point = project_onto_line(a, b, circle->center, &t);
-
-		double depth = circle->radius + vector_dot(circle->center, axis) - vector_dot(point, axis);
+		double depth = circle->radius + vector_dot(circle->center, axis) - vector_dot(a, axis);
 
 		if (depth < collision->depth)
 		{
@@ -921,44 +906,44 @@ bool collide_circle_polygon(const Circle* circle, const Polygon* polygon, Collis
 
 			collision->depth = depth;
 
-			collision->point = point;
+			collision->point = circle->center;
 
 			collision->normal = axis;
-
-			outside = t < 0 || t > 1;
 		}
 	}
 
-	if (outside)
+	if (collision->depth >= circle->radius)
 	{
-		collision->depth = -INFINITY;
+		return true;
+	}
 
-		for (int i = polygon->point_count - 1, j = 0; j < polygon->point_count; i = j, j++)
+	collision->depth = -INFINITY;
+
+	for (int i = polygon->point_count - 1, j = 0; j < polygon->point_count; i = j, j++)
+	{
+		Vector a = polygon->points[i];
+
+		Vector b = polygon->points[j];
+
+		Vector point = project_onto_segment(a, b, circle->center);
+
+		Vector axis = vector_normalize(vector_subtract(point, circle->center));
+
+		double depth = circle->radius + vector_dot(circle->center, axis) - vector_dot(point, axis);
+
+		if (depth > collision->depth)
 		{
-			Vector a = polygon->points[i];
+			collision->depth = depth;
 
-			Vector b = polygon->points[j];
+			collision->point = point;
 
-			Vector point = project_onto_segment(a, b, circle->center);
-
-			Vector axis = vector_normalize(vector_subtract(point, circle->center));
-
-			double depth = circle->radius + vector_dot(circle->center, axis) - vector_dot(point, axis);
-
-			if (depth > collision->depth)
-			{
-				collision->depth = depth;
-
-				collision->point = point;
-
-				collision->normal = axis;
-			}
+			collision->normal = axis;
 		}
+	}
 
-		if (collision->depth < 0)
-		{
-			return false;
-		}
+	if (collision->depth < 0)
+	{
+		return false;
 	}
 
 	return true;
