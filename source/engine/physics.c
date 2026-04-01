@@ -84,9 +84,9 @@ void physics_world_step(Physics_World* world, double delta_time)
 				break;
 			}
 		}
-		
+
 		body->linear_force = vector_create(0.0, 0.0);
-		
+
 		body->angular_force = 0.0;
 	}
 
@@ -94,7 +94,7 @@ void physics_world_step(Physics_World* world, double delta_time)
 	{
 		List_Node* next = collider_node->next;
 
-		while (collider_node->prev != NULL && ((Physics_Collider*)collider_node->item)->world_bounding_rect.min.x < ((Physics_Collider*)collider_node->prev->item)->world_bounding_rect.min.x)
+		while (collider_node->prev != NULL && ((Physics_Collider*)collider_node->item)->world_bounding_rect.min.y < ((Physics_Collider*)collider_node->prev->item)->world_bounding_rect.min.y)
 		{
 			list_node_swap_with_prev(collider_node);
 		}
@@ -104,7 +104,12 @@ void physics_world_step(Physics_World* world, double delta_time)
 
 	int collision_count_limit = imin(isquare(world->collider_list.size), PHYSICS_COLLISION_COUNT_MAX);
 
-	Physics_Collision* collisions = HEAPALLOC(collision_count_limit * sizeof(Physics_Collision));
+	if (world->collisions == NULL)
+	{
+		world->collisions = HEAPALLOC(collision_count_limit * sizeof(Physics_Collision));
+	}
+
+	Physics_Collision* collisions = world->collisions;
 
 	int collision_count = 0;
 
@@ -126,12 +131,12 @@ void physics_world_step(Physics_World* world, double delta_time)
 				continue;
 			}
 
-			if (collider_2->world_bounding_rect.min.x > collider_1->world_bounding_rect.max.x)
+			if (collider_2->world_bounding_rect.min.y > collider_1->world_bounding_rect.max.y)
 			{
 				break;
 			}
 
-			if (collider_2->world_bounding_rect.min.y > collider_1->world_bounding_rect.max.y || collider_1->world_bounding_rect.min.y > collider_2->world_bounding_rect.max.y)
+			if (collider_2->world_bounding_rect.min.x > collider_1->world_bounding_rect.max.x || collider_1->world_bounding_rect.min.x > collider_2->world_bounding_rect.max.x)
 			{
 				continue;
 			}
@@ -151,8 +156,10 @@ void physics_world_step(Physics_World* world, double delta_time)
 				continue;
 			}
 
+			memset(&collisions[collision_count], 0, sizeof(Physics_Collision));
+
 			bool collided = physics_collide(collider_1, collider_2, &collisions[collision_count]);
-			
+
 			if (collided)
 			{
 				if (world->collision_callback != NULL)
@@ -188,12 +195,16 @@ void physics_world_step(Physics_World* world, double delta_time)
 
 						collisions[collision_count].collision = collision;
 
+						collisions[collision_count].second = true;
+
 						collision_count++;
 					}
 				}
 			}
 		}
 	}
+
+	world->collision_count = collision_count;
 
 	for (int i = 0; i < collision_count; i++)
 	{
@@ -219,162 +230,150 @@ void physics_world_step(Physics_World* world, double delta_time)
 
 		double normal_velocity = vector_dot(collision.normal, relative_velocity);
 
-		if (normal_velocity >= 0)
-		{
-			continue;
-		}
-
 		double combined_restitution = fmax(collider_1->restitution, collider_2->restitution);
-
-		double rebound_velocity = -fmin(normal_velocity, 0) * combined_restitution;
-
-		double correction_velocity = collision.depth / delta_time * PHYSICS_CORRECTION_VELOCITY_FACTOR;
-
-		double target_velocity = fmax(rebound_velocity, correction_velocity);
 
 		double normal_inverse_mass_1 = body_1->inverse_linear_mass + body_1->inverse_angular_mass * square(vector_dot(collision.normal, tangent_1));
 
 		double normal_inverse_mass_2 = body_2->inverse_linear_mass + body_2->inverse_angular_mass * square(vector_dot(collision.normal, tangent_2));
 
-		double collision_impulse = (target_velocity - normal_velocity) / (normal_inverse_mass_1 + normal_inverse_mass_2);
+		collisions[i].inverse_normal_mass = 1 / (normal_inverse_mass_1 + normal_inverse_mass_2);
 
-		body_1->linear_velocity = vector_subtract(body_1->linear_velocity, vector_multiply(collision.normal, collision_impulse * body_1->inverse_linear_mass));
+		collisions[i].target_velocity = -fmin(normal_velocity, 0) * combined_restitution;
 
-		body_2->linear_velocity = vector_add(body_2->linear_velocity, vector_multiply(collision.normal, collision_impulse * body_2->inverse_linear_mass));
-
-		body_1->angular_velocity -= vector_dot(collision.normal, tangent_1) * collision_impulse * body_1->inverse_angular_mass;
-
-		body_2->angular_velocity += vector_dot(collision.normal, tangent_2) * collision_impulse * body_2->inverse_angular_mass;
+		collisions[i].normal_impulse = 0;
 
 		Vector collision_tangent = vector_right(collision.normal);
 
-		double tangent_velocity = vector_dot(collision_tangent, relative_velocity);
+		collisions[i].static_friction = sqrt(collider_1->static_friction * collider_2->static_friction);
 
-		double combined_static_friction = sqrt(collider_1->static_friction * collider_2->static_friction);
-
-		double combined_dynamic_friction = sqrt(collider_1->dynamic_friction * collider_2->dynamic_friction);
+		collisions[i].dynamic_friction = sqrt(collider_1->dynamic_friction * collider_2->dynamic_friction);
 
 		double tangent_inverse_mass_1 = body_1->inverse_linear_mass + body_1->inverse_angular_mass * square(vector_dot(collision_tangent, tangent_1));
 
 		double tangent_inverse_mass_2 = body_2->inverse_linear_mass + body_2->inverse_angular_mass * square(vector_dot(collision_tangent, tangent_2));
 
-		double friction_impulse = -tangent_velocity * combined_static_friction / (tangent_inverse_mass_1 + tangent_inverse_mass_2);
-
-		double max_impulse_magnitude = fabs(collision_impulse) * combined_dynamic_friction;
-
-		friction_impulse = clamp(friction_impulse, -max_impulse_magnitude, max_impulse_magnitude);
-
-		body_1->linear_velocity = vector_subtract(body_1->linear_velocity, vector_multiply(collision_tangent, friction_impulse * body_1->inverse_linear_mass));
-
-		body_2->linear_velocity = vector_add(body_2->linear_velocity, vector_multiply(collision_tangent, friction_impulse * body_2->inverse_linear_mass));
-
-		body_1->angular_velocity -= vector_dot(collision_tangent, tangent_1) * friction_impulse * body_1->inverse_angular_mass;
-
-		body_2->angular_velocity += vector_dot(collision_tangent, tangent_2) * friction_impulse * body_2->inverse_angular_mass;
+		collisions[i].inverse_tangent_mass = 1 / (tangent_inverse_mass_1 + tangent_inverse_mass_2);
 	}
 
-	free(collisions);
-
-	for (List_Node* joint_node = world->joint_list.first; joint_node != NULL; joint_node = joint_node->next)
+	for (int t = 0; t < PHYSICS_VELOCITY_ITERATION_COUNT; t++)
 	{
-		Physics_Joint* joint = joint_node->item;
-
-		switch (joint->type)
+		for (int i = 0; i < collision_count; i++)
 		{
-			case PHYSICS_JOINT_TYPE_FIXED:
+			Collision collision = collisions[i].collision;
+
+			Physics_Collider* collider_1 = collisions[i].collider_1;
+
+			Physics_Collider* collider_2 = collisions[i].collider_2;
+
+			Physics_Body* body_1 = collider_1->body;
+
+			Physics_Body* body_2 = collider_2->body;
+
+			Vector tangent_1 = vector_left(vector_subtract(collision.point, body_1->position));
+
+			Vector tangent_2 = vector_left(vector_subtract(collision.point, body_2->position));
+
+			Vector contact_velocity_1 = vector_add(body_1->linear_velocity, vector_multiply(tangent_1, body_1->angular_velocity));
+
+			Vector contact_velocity_2 = vector_add(body_2->linear_velocity, vector_multiply(tangent_2, body_2->angular_velocity));
+
+			Vector relative_velocity = vector_subtract(contact_velocity_2, contact_velocity_1);
+
+			double normal_velocity = vector_dot(collision.normal, relative_velocity);
+
+			double impulse = (collisions[i].target_velocity - normal_velocity) * collisions[i].inverse_normal_mass;
+
+			double total_impulse = fmax(collisions[i].normal_impulse + impulse, 0);
+
+			double collision_impulse = total_impulse - collisions[i].normal_impulse;
+
+			collisions[i].normal_impulse = total_impulse;
+
+			body_1->linear_velocity = vector_subtract(body_1->linear_velocity, vector_multiply(collision.normal, collision_impulse * body_1->inverse_linear_mass));
+
+			body_2->linear_velocity = vector_add(body_2->linear_velocity, vector_multiply(collision.normal, collision_impulse * body_2->inverse_linear_mass));
+
+			body_1->angular_velocity -= vector_dot(collision.normal, tangent_1) * collision_impulse * body_1->inverse_angular_mass;
+
+			body_2->angular_velocity += vector_dot(collision.normal, tangent_2) * collision_impulse * body_2->inverse_angular_mass;
+
+			Vector collision_tangent = vector_right(collision.normal);
+
+			double tangent_velocity = vector_dot(collision_tangent, relative_velocity);
+
+			double total_tangent_impulse = collisions[i].tangent_impulse - tangent_velocity * collisions[i].static_friction * collisions[i].inverse_tangent_mass;
+
+			double max_impulse_magnitude = collisions[i].normal_impulse * collisions[i].dynamic_friction;
+
+			total_tangent_impulse = clamp(total_tangent_impulse, -max_impulse_magnitude, max_impulse_magnitude);
+
+			double tangent_impulse = total_tangent_impulse - collisions[i].tangent_impulse;
+
+			collisions[i].tangent_impulse = total_tangent_impulse;
+
+			body_1->linear_velocity = vector_subtract(body_1->linear_velocity, vector_multiply(collision_tangent, tangent_impulse * body_1->inverse_linear_mass));
+
+			body_2->linear_velocity = vector_add(body_2->linear_velocity, vector_multiply(collision_tangent, tangent_impulse * body_2->inverse_linear_mass));
+
+			body_1->angular_velocity -= vector_dot(collision_tangent, tangent_1) * tangent_impulse * body_1->inverse_angular_mass;
+
+			body_2->angular_velocity += vector_dot(collision_tangent, tangent_2) * tangent_impulse * body_2->inverse_angular_mass;
+		}
+
+		for (List_Node* joint_node = world->joint_list.first; joint_node != NULL; joint_node = joint_node->next)
+		{
+			Physics_Joint* joint = joint_node->item;
+
+			Physics_Body* body_1 = joint->body_1;
+
+			Physics_Body* body_2 = joint->body_2;
+
+			Vector displacement = vector_subtract(joint->world_anchor_2, joint->world_anchor_1);
+
+			double distance = vector_length(displacement);
+
+			if (distance > 0)
 			{
-				Vector displacement = vector_subtract(joint->world_anchor_2, joint->world_anchor_1);
-				
-				Vector normal = vector_normalize(displacement);
-				
-				double distance = vector_length(displacement);
+				Vector normal = vector_divide(displacement, distance);
 
-				if (distance != 0.0)
-				{
-					Vector tangent_1 = vector_left(vector_subtract(joint->world_anchor_1, joint->body_1->position));
+				Vector lever_1 = vector_subtract(joint->world_anchor_1, body_1->position);
 
-					Vector tangent_2 = vector_left(vector_subtract(joint->world_anchor_2, joint->body_2->position));
+				Vector lever_2 = vector_subtract(joint->world_anchor_2, body_2->position);
 
-					double inverse_mass_1 = joint->body_1->inverse_linear_mass + joint->body_1->inverse_angular_mass * square(vector_dot(normal, tangent_1));
+				Vector tangent_1 = vector_left(lever_1);
 
-					double inverse_mass_2 = joint->body_2->inverse_linear_mass + joint->body_2->inverse_angular_mass * square(vector_dot(normal, tangent_2));
+				Vector tangent_2 = vector_left(lever_2);
 
-					Vector lever_1 = vector_subtract(joint->world_anchor_1, joint->body_1->position);
+				double inverse_mass_1 = body_1->inverse_linear_mass + body_1->inverse_angular_mass * square(vector_dot(normal, tangent_1));
 
-					Vector lever_2 = vector_subtract(joint->world_anchor_2, joint->body_2->position);
+				double inverse_mass_2 = body_2->inverse_linear_mass + body_2->inverse_angular_mass * square(vector_dot(normal, tangent_2));
 
-					double normal_velocity_1 = vector_dot(joint->body_1->linear_velocity, normal) + vector_cross(lever_1, normal) * joint->body_1->angular_velocity;
+				double normal_velocity_1 = vector_dot(body_1->linear_velocity, normal) + vector_cross(lever_1, normal) * body_1->angular_velocity;
 
-					double normal_velocity_2 = vector_dot(joint->body_2->linear_velocity, normal) + vector_cross(lever_2, normal) * joint->body_2->angular_velocity;
+				double normal_velocity_2 = vector_dot(body_2->linear_velocity, normal) + vector_cross(lever_2, normal) * body_2->angular_velocity;
 
-					double normal_velocity = normal_velocity_2 - normal_velocity_1;
+				double normal_velocity = normal_velocity_2 - normal_velocity_1;
 
-					double correction_impulse = (distance / delta_time * PHYSICS_CORRECTION_VELOCITY_FACTOR + normal_velocity) / (inverse_mass_1 + inverse_mass_2);
+				double correction_impulse = normal_velocity / (inverse_mass_1 + inverse_mass_2);
 
-					joint->body_1->linear_velocity = vector_add(joint->body_1->linear_velocity, vector_multiply(normal, correction_impulse * joint->body_1->inverse_linear_mass));
+				body_1->linear_velocity = vector_add(body_1->linear_velocity, vector_multiply(normal, correction_impulse * body_1->inverse_linear_mass));
 
-					joint->body_2->linear_velocity = vector_subtract(joint->body_2->linear_velocity, vector_multiply(normal, correction_impulse * joint->body_2->inverse_linear_mass));
+				body_2->linear_velocity = vector_subtract(body_2->linear_velocity, vector_multiply(normal, correction_impulse * body_2->inverse_linear_mass));
 
-					joint->body_1->angular_velocity += vector_dot(normal, tangent_1) * correction_impulse * joint->body_1->inverse_angular_mass;
+				body_1->angular_velocity += vector_dot(normal, tangent_1) * correction_impulse * body_1->inverse_angular_mass;
 
-					joint->body_2->angular_velocity -= vector_dot(normal, tangent_2) * correction_impulse * joint->body_2->inverse_angular_mass;
-				}
-
-				double relative_angle = joint->body_2->angle - joint->body_1->angle;
-
-				if (relative_angle != 0.0)
-				{
-					double relative_angular_velocity = joint->body_2->angular_velocity - joint->body_1->angular_velocity;
-
-					double correction_angular_impulse = (relative_angle / delta_time * PHYSICS_CORRECTION_VELOCITY_FACTOR + relative_angular_velocity) / (joint->body_1->inverse_angular_mass + joint->body_2->inverse_angular_mass);
-
-					joint->body_1->angular_velocity += correction_angular_impulse * joint->body_1->inverse_angular_mass;
-					
-					joint->body_2->angular_velocity -= correction_angular_impulse * joint->body_2->inverse_angular_mass;
-				}
-
-				break;
+				body_2->angular_velocity -= vector_dot(normal, tangent_2) * correction_impulse * body_2->inverse_angular_mass;
 			}
-			case PHYSICS_JOINT_TYPE_PIN:
+
+			if (joint->type == PHYSICS_JOINT_TYPE_FIXED)
 			{
-				Vector displacement = vector_subtract(joint->world_anchor_2, joint->world_anchor_1);
-				
-				Vector normal = vector_normalize(displacement);
-				
-				double distance = vector_length(displacement);
+				double relative_angular_velocity = body_2->angular_velocity - body_1->angular_velocity;
 
-				if (distance != 0.0)
-				{
-					Vector tangent_1 = vector_left(vector_subtract(joint->world_anchor_1, joint->body_1->position));
+				double correction_angular_impulse = relative_angular_velocity / (body_1->inverse_angular_mass + body_2->inverse_angular_mass);
 
-					Vector tangent_2 = vector_left(vector_subtract(joint->world_anchor_2, joint->body_2->position));
+				body_1->angular_velocity += correction_angular_impulse * body_1->inverse_angular_mass;
 
-					double inverse_mass_1 = joint->body_1->inverse_linear_mass + joint->body_1->inverse_angular_mass * square(vector_dot(normal, tangent_1));
-
-					double inverse_mass_2 = joint->body_2->inverse_linear_mass + joint->body_2->inverse_angular_mass * square(vector_dot(normal, tangent_2));
-
-					Vector lever_1 = vector_subtract(joint->world_anchor_1, joint->body_1->position);
-
-					Vector lever_2 = vector_subtract(joint->world_anchor_2, joint->body_2->position);
-
-					double normal_velocity_1 = vector_dot(joint->body_1->linear_velocity, normal) + vector_cross(lever_1, normal) * joint->body_1->angular_velocity;
-
-					double normal_velocity_2 = vector_dot(joint->body_2->linear_velocity, normal) + vector_cross(lever_2, normal) * joint->body_2->angular_velocity;
-
-					double normal_velocity = normal_velocity_2 - normal_velocity_1;
-
-					double correction_impulse = (distance / delta_time * PHYSICS_CORRECTION_VELOCITY_FACTOR + normal_velocity) / (inverse_mass_1 + inverse_mass_2);
-
-					joint->body_1->linear_velocity = vector_add(joint->body_1->linear_velocity, vector_multiply(normal, correction_impulse * joint->body_1->inverse_linear_mass));
-
-					joint->body_2->linear_velocity = vector_subtract(joint->body_2->linear_velocity, vector_multiply(normal, correction_impulse * joint->body_2->inverse_linear_mass));
-
-					joint->body_1->angular_velocity += vector_dot(normal, tangent_1) * correction_impulse * joint->body_1->inverse_angular_mass;
-
-					joint->body_2->angular_velocity -= vector_dot(normal, tangent_2) * correction_impulse * joint->body_2->inverse_angular_mass;
-				}
-
-				break;
+				body_2->angular_velocity -= correction_angular_impulse * body_2->inverse_angular_mass;
 			}
 		}
 	}
@@ -383,14 +382,114 @@ void physics_world_step(Physics_World* world, double delta_time)
 	{
 		Physics_Body* body = body_node->item;
 
-		Vector position_change = vector_multiply(body->linear_velocity, delta_time);
+		body->position_change = vector_multiply(body->linear_velocity, delta_time);
 
-		double angle_change = body->angular_velocity * delta_time;
-		
+		body->angle_change = body->angular_velocity * delta_time;
+	}
+
+	for (int t = 0; t < PHYSICS_POSITION_ITERATION_COUNT; t++)
+	{
+		for (int i = 0; i < collision_count; i++)
+		{
+			Collision collision = collisions[i].collision;
+
+			Physics_Collider* collider_1 = collisions[i].collider_1;
+
+			Physics_Collider* collider_2 = collisions[i].collider_2;
+
+			Physics_Body* body_1 = collider_1->body;
+
+			Physics_Body* body_2 = collider_2->body;
+
+			Vector tangent_1 = vector_left(vector_subtract(collision.point, body_1->position));
+
+			Vector tangent_2 = vector_left(vector_subtract(collision.point, body_2->position));
+
+			double linear_contribution = vector_dot(collision.normal, vector_subtract(body_2->position_change, body_1->position_change));
+
+			double angular_contribution = body_2->angle_change * vector_dot(collision.normal, tangent_2) - body_1->angle_change * vector_dot(collision.normal, tangent_1);
+
+			double current_depth = collision.depth - (linear_contribution + angular_contribution);
+
+			double collision_impulse = fmax(current_depth, 0) * PHYSICS_CORRECTION_FACTOR * collisions[i].inverse_normal_mass;
+
+			body_1->position_change = vector_subtract(body_1->position_change, vector_multiply(collision.normal, collision_impulse * body_1->inverse_linear_mass));
+
+			body_2->position_change = vector_add(body_2->position_change, vector_multiply(collision.normal, collision_impulse * body_2->inverse_linear_mass));
+
+			body_1->angle_change -= vector_dot(collision.normal, tangent_1) * collision_impulse * body_1->inverse_angular_mass;
+
+			body_2->angle_change += vector_dot(collision.normal, tangent_2) * collision_impulse * body_2->inverse_angular_mass;
+		}
+
+		for (List_Node* joint_node = world->joint_list.first; joint_node != NULL; joint_node = joint_node->next)
+		{
+			Physics_Joint* joint = joint_node->item;
+
+			Physics_Body* body_1 = joint->body_1;
+
+			Physics_Body* body_2 = joint->body_2;
+
+			Vector lever_1 = vector_rotate(joint->local_anchor_1, body_1->angle + body_1->angle_change);
+
+			Vector lever_2 = vector_rotate(joint->local_anchor_2, body_2->angle + body_2->angle_change);
+
+			Vector world_anchor_1 = vector_add(vector_add(body_1->position, body_1->position_change), lever_1);
+
+			Vector world_anchor_2 = vector_add(vector_add(body_2->position, body_2->position_change), lever_2);
+
+			Vector displacement = vector_subtract(world_anchor_2, world_anchor_1);
+
+			double distance = vector_length(displacement);
+
+			if (distance > 0)
+			{
+				Vector normal = vector_divide(displacement, distance);
+
+				Vector tangent_1 = vector_left(lever_1);
+
+				Vector tangent_2 = vector_left(lever_2);
+
+				double inverse_mass_1 = body_1->inverse_linear_mass + body_1->inverse_angular_mass * square(vector_dot(normal, tangent_1));
+
+				double inverse_mass_2 = body_2->inverse_linear_mass + body_2->inverse_angular_mass * square(vector_dot(normal, tangent_2));
+
+				double correction_impulse = distance * PHYSICS_CORRECTION_FACTOR / (inverse_mass_1 + inverse_mass_2);
+
+				body_1->position_change = vector_add(body_1->position_change, vector_multiply(normal, correction_impulse * body_1->inverse_linear_mass));
+
+				body_2->position_change = vector_subtract(body_2->position_change, vector_multiply(normal, correction_impulse * body_2->inverse_linear_mass));
+
+				body_1->angle_change += vector_dot(normal, tangent_1) * correction_impulse * body_1->inverse_angular_mass;
+
+				body_2->angle_change -= vector_dot(normal, tangent_2) * correction_impulse * body_2->inverse_angular_mass;
+			}
+
+			if (joint->type == PHYSICS_JOINT_TYPE_FIXED)
+			{
+				double relative_angle = body_2->angle - body_1->angle + body_2->angle_change - body_1->angle_change;
+
+				double correction_angular_impulse = relative_angle * PHYSICS_CORRECTION_FACTOR / (body_1->inverse_angular_mass + body_2->inverse_angular_mass);
+
+				body_1->angle_change += correction_angular_impulse * body_1->inverse_angular_mass;
+
+				body_2->angle_change -= correction_angular_impulse * body_2->inverse_angular_mass;
+			}
+		}
+	}
+
+	for (List_Node* body_node = world->body_list.first; body_node != NULL; body_node = body_node->next)
+	{
+		Physics_Body* body = body_node->item;
+
+		Vector position_change = body->position_change;
+
+		double angle_change = body->angle_change;
+
 		body->position = vector_add(body->position, position_change);
 
 		body->angle += angle_change;
-		
+
 		body->world_transform_is_dirty |= position_change.x != 0.0;
 
 		body->world_transform_is_dirty |= position_change.y != 0.0;

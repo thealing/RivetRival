@@ -231,9 +231,9 @@ Car* car_create(Car_Type type, Physics_World* world, Vector position, int group)
 
 			car->textures[0] = g_textures.head_neck[car->side];
 
-			car->wheels[0] = wheel_create(WHEEL_TYPE_MONSTER, car->chassis_body, vector_create(-40, -18), group, 22, 10, 70, 4, 1);
+			car->wheels[0] = wheel_create(WHEEL_TYPE_MONSTER, car->chassis_body, vector_create(-40, -18), group, 22, 4, 70, 4, 1);
 
-			car->wheels[1] = wheel_create(WHEEL_TYPE_MEDIUM, car->chassis_body, vector_create(33, -26), group, 14, 10, 70, 4, 3);
+			car->wheels[1] = wheel_create(WHEEL_TYPE_MEDIUM, car->chassis_body, vector_create(33, -26), group, 14, 4, 70, 4, 3);
 
 			break;
 		}
@@ -282,7 +282,7 @@ Car* car_create(Car_Type type, Physics_World* world, Vector position, int group)
 
 			car->wheels[1] = wheel_create(WHEEL_TYPE_MEDIUM, car->chassis_body, vector_create(46, -33), group, 14, 10, 60, 5, 3);
 
-			create_extra_body(car, 8, world, position, 0, vector_create(-52, 3), 3, 1, s_garbage_lid, COUNTOF(s_garbage_lid), COUNTOF(s_garbage_lid[0]), 0);
+			create_extra_body(car, 8, world, position, 0, vector_create(-52, 3), 3, 10, s_garbage_lid, COUNTOF(s_garbage_lid), COUNTOF(s_garbage_lid[0]), 0);
 
 			Vector joint_position = vector_add_xy(position, -45, 33);
 

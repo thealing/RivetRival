@@ -12,7 +12,7 @@ int main()
 
 	bool started = false;
 
-	double update_delta = 1.0 / 240.0;
+	double update_delta = 1.0 / 200.0;
 
 	double render_delta = 1.0 / 60.0;
 

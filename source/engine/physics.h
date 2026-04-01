@@ -4,9 +4,13 @@
 
 #include "list.h"
 
-#define PHYSICS_COLLISION_COUNT_MAX 100000
+#define PHYSICS_COLLISION_COUNT_MAX 99999
 
-#define PHYSICS_CORRECTION_VELOCITY_FACTOR 0.4
+#define PHYSICS_CORRECTION_FACTOR 0.3
+
+#define PHYSICS_VELOCITY_ITERATION_COUNT 4
+
+#define PHYSICS_POSITION_ITERATION_COUNT 4
 
 typedef enum Physics_Body_Type Physics_Body_Type;
 
@@ -22,7 +26,7 @@ typedef struct Physics_Joint Physics_Joint;
 
 typedef struct Physics_Collision Physics_Collision;
 
-typedef bool (* Physics_Collision_Callback)(Physics_Collider* collider, Physics_Collider* other);
+typedef bool (*Physics_Collision_Callback)(Physics_Collider* collider, Physics_Collider* other);
 
 enum Physics_Body_Type
 {
@@ -54,6 +58,10 @@ struct Physics_World
 
 	List joint_list;
 
+	Physics_Collision* collisions;
+
+	int collision_count;
+
 	Physics_Collision_Callback collision_callback;
 };
 
@@ -74,6 +82,10 @@ struct Physics_Body
 	Vector position;
 
 	double angle;
+
+	Vector position_change;
+
+	double angle_change;
 
 	Vector linear_velocity;
 
@@ -128,8 +140,6 @@ struct Physics_Collider
 
 	Physics_Collision_Callback collision_callback;
 
-	// not used by engine
-
 	void* data;
 
 	int flags;
@@ -165,6 +175,22 @@ struct Physics_Collision
 	Physics_Collider* collider_1;
 
 	Physics_Collider* collider_2;
+
+	bool second;
+
+	double inverse_normal_mass;
+
+	double inverse_tangent_mass;
+
+	double target_velocity;
+
+	double static_friction;
+
+	double dynamic_friction;
+
+	double normal_impulse;
+
+	double tangent_impulse;
 };
 
 Physics_World* physics_world_create();
