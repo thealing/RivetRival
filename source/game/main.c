@@ -28,6 +28,8 @@ int main()
 
 	double last_measure_time = start_time;
 
+	bool paused = false;
+
 	int update_count = 0;
 
 	int render_count = 0;
@@ -56,8 +58,10 @@ int main()
 				{
 					case WINDOW_EVENT_RESUMED:
 					{
-						if (started)
+						if (started && paused)
 						{
+							paused = false;
+
 							scene_resume();
 						}
 
@@ -65,8 +69,10 @@ int main()
 					}
 					case WINDOW_EVENT_PAUSED:
 					{
-						if (started)
+						if (started && !paused)
 						{
+							paused = true;
+
 							scene_pause();
 						}
 
@@ -177,7 +183,10 @@ int main()
 				}
 			}
 
-			update(update_delta);
+			if (!paused)
+			{
+				update(update_delta);
+			}
 
 			last_update_time = fmax(last_update_time + update_delta, current_time - max_latency);
 

@@ -89,18 +89,27 @@ LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 			if (LOWORD(wparam) == WA_INACTIVE)
 			{
 				event.type = WINDOW_EVENT_PAUSED;
+
+				push_event(&event);
 			}
 			else
 			{
 				event.type = WINDOW_EVENT_RESUMED;
-			}
 
-			push_event(&event);
+				push_event(&event);
+			}
 
 			break;
 		}
 		case WM_SIZE:
 		{
+			if (wparam == SIZE_MINIMIZED)
+			{
+				event.type = WINDOW_EVENT_PAUSED;
+
+				push_event(&event);
+			}
+
 			glViewport(0, 0, LOWORD(lparam), HIWORD(lparam));
 
 			break;
