@@ -40,7 +40,9 @@ static void draw_car(Vector center, Vector bottom, double scale, Car* car)
 	{
 		graphics_translate(center);
 
-		graphics_scale(vector_create(400, 250));
+		graphics_translate(vector_create(0, -20));
+
+		graphics_scale(vector_create(250, 250));
 
 		graphics_set_color(&(Color){ 0, 0, 0, 1 });
 
@@ -78,7 +80,9 @@ static void draw_level(Vector center, Vector bottom, double scale)
 	{
 		graphics_translate(center);
 
-		graphics_scale(vector_create(400, 250));
+		graphics_translate(vector_create(0, -20));
+
+		graphics_scale(vector_create(250, 250));
 
 		graphics_set_color(&(Color){ 0, 0, 0, 1 });
 
