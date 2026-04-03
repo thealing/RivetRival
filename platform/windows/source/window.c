@@ -212,7 +212,11 @@ void window_create(int width, int height)
 
 	char* title = config_get_value(CONFIG_KEY_WINDOW_TITLE);
 
-	HWND window = CreateWindowEx(0, wc.lpszClassName, title, WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, width, height, NULL, NULL, instance, NULL);
+	RECT wr = { 0, 0, width, height };
+
+	AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, FALSE);
+
+	HWND window = CreateWindowEx(0, wc.lpszClassName, title, WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, wr.right - wr.left, wr.bottom - wr.top, NULL, NULL, instance, NULL);
 
 	Window_Event event = { 0 };
 
