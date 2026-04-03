@@ -9,6 +9,4 @@ A cross-platform [Drive Ahead](https://play.google.com/store/apps/details?id=com
 - Left Arrow - red forward
 - Right Arrow - red backward
 ## Screenshots
-![Battle5](https://github.com/user-attachments/assets/82717071-7165-4360-947b-4a9565b0c8e9)
-![Battle7](https://github.com/user-attachments/assets/aa21ea2d-9161-43dd-84ab-41ab8b062727)
-![battle8](https://github.com/user-attachments/assets/3003476d-9c72-425a-ac04-d006817886ca)
+SOON
