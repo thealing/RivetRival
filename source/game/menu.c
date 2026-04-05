@@ -313,5 +313,5 @@ void menu_render()
 
 	graphics_draw_string_in_rect(&(Rect){ 810, 130, 0, 170 }, ALIGNMENT_LEFT, "LEVEL");
 
-	graphics_draw_string_in_rect(&(Rect){ 810, 50, 0, 90 }, ALIGNMENT_LEFT, "SCORES TO WIN");
+	graphics_draw_string_in_rect(&(Rect){ 810, 50, 0, 90 }, ALIGNMENT_LEFT, "TARGET SCORE");
 }
