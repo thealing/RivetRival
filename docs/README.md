@@ -9,7 +9,7 @@ A cross-platform [Drive Ahead](https://play.google.com/store/apps/details?id=com
 - Left Arrow - red forward
 - Right Arrow - red backward
 ## Screenshots
-<img src="screen1.png" />
-<img src="screen2.png" />
-<img src="screen3.png" />
-<img src="screen4.png" />
+<img src="image1.png" />
+<img src="image2.png" />
+<img src="image3.png" />
+<img src="image4.png" />
