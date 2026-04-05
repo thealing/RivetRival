@@ -58,10 +58,6 @@ struct Physics_World
 
 	List joint_list;
 
-	Physics_Collision* collisions;
-
-	int collision_count;
-
 	Physics_Collision_Callback collision_callback;
 };
 
