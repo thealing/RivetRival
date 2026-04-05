@@ -282,7 +282,7 @@ Car* car_create(Car_Type type, Physics_World* world, Vector position, int group)
 
 			car->wheels[1] = wheel_create(WHEEL_TYPE_MEDIUM, car->chassis_body, vector_create(46, -33), group, 14, 10, 60, 5, 3);
 
-			create_extra_body(car, 8, world, position, 0, vector_create(-52, 3), 3, 10, s_garbage_lid, COUNTOF(s_garbage_lid), COUNTOF(s_garbage_lid[0]), 0);
+			create_extra_body(car, 8, world, position, 0, vector_create(-52, 3), 10, 1, s_garbage_lid, COUNTOF(s_garbage_lid), COUNTOF(s_garbage_lid[0]), 0);
 
 			Vector joint_position = vector_add_xy(position, -45, 33);
 
